@@ -1,2 +1,2 @@
 # phobos
-phobos compiler
+phobos language compiler for the mars operating system
