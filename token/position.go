@@ -8,7 +8,7 @@
 
 package token
 
-// Pos is a compact way to store the position in a source file.
+// Pos is a compact way to store a position in a source file.
 type Pos int
 
 // NoPos represents no position.  This is mainly used when we manually add nodes into the AST.

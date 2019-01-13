@@ -17,22 +17,168 @@ type Token int
 const (
 	ILLEGAL = iota
 
-	IDENT
-	INT
+	Identifier
+	Integer
+	Float
+	Character
+	String
 
-	BREAK
-	WHILE
+	LeftBrace
+	RightBrace
+	LeftBracket
+	RightBracket
+	LeftParenthesis
+	RightParenthesis
+	Colon
+	Comma
+	Returns
+	Dot
+	DotDot
+	Assign
+	DeclareAssign
+
+	Asterisk
+	Divide
+	Minus
+	Mod
+	Plus
+
+	BitwiseAnd
+	BitwiseOr
+	BitwiseNot
+	ShiftLeft
+	ShiftRight
+
+	DivideEquals
+	MinusEquals
+	ModEquals
+	MultiplyEquals
+	PlusEquals
+	BitwiseAndEquals
+	BitwiseOrEquals
+	BitwiseNotEquals
+	ShiftLeftEquals
+	ShiftRightEquals
+
+	Equal
+	NotEqual
+	LessThan
+	LessThanOrEqual
+	GreaterThan
+	GreaterThanOrEqual
+
+	LogicalAnd
+	LogicalOr
+	Not
+
+	As
+	Break
+	Case
+	Const
+	Continue
+	Default
+	Defer
+	Else
+	Enum
+	False
+	For
+	Func
+	If
+	Import
+	In
+	Interface
+	New
+	Return
+	Struct
+	Switch
+	True
+	Type
+	Var
+	While
 )
 
 // Token strings
 var tokens = []string{
 	ILLEGAL: "ILLEGAL",
 
-	IDENT: "IDENT",
-	INT:   "INT",
+	Identifier: "Identifier",
+	Integer:    "Integer",
+	Float:      "Float",
+	Character:  "Character",
+	String:     "String",
 
-	BREAK: "break",
-	WHILE: "while",
+	LeftBrace:        "{",
+	RightBrace:       "}",
+	LeftBracket:      "[",
+	RightBracket:     "]",
+	LeftParenthesis:  "(",
+	RightParenthesis: ")",
+	Colon:            ":",
+	Comma:            ",",
+	Returns:          "->",
+	Dot:              ".",
+	DotDot:           "..",
+	Assign:           "=",
+	DeclareAssign:    ":=",
+
+	Asterisk: "*",
+	Divide:   "/",
+	Minus:    "-",
+	Mod:      "%",
+	Plus:     "+",
+
+	BitwiseAnd: "&",
+	BitwiseOr:  "|",
+	BitwiseNot: "~",
+	ShiftLeft:  "<<",
+	ShiftRight: ">>",
+
+	DivideEquals:     "/=",
+	MinusEquals:      "-=",
+	ModEquals:        "%=",
+	MultiplyEquals:   "*=",
+	PlusEquals:       "+=",
+	BitwiseAndEquals: "&=",
+	BitwiseOrEquals:  "|=",
+	BitwiseNotEquals: "~=",
+	ShiftLeftEquals:  "<<=",
+	ShiftRightEquals: ">>=",
+
+	Equal:              "==",
+	NotEqual:           "!=",
+	LessThan:           "<",
+	LessThanOrEqual:    "<=",
+	GreaterThan:        ">",
+	GreaterThanOrEqual: ">=",
+
+	LogicalAnd: "&&",
+	LogicalOr:  "||",
+	Not:        "!",
+
+	As:        "as",
+	Break:     "break",
+	Case:      "case",
+	Const:     "const",
+	Continue:  "continue",
+	Default:   "default",
+	Defer:     "defer",
+	Else:      "else",
+	Enum:      "enum",
+	False:     "false",
+	For:       "for",
+	Func:      "func",
+	If:        "if",
+	Import:    "import",
+	In:        "in",
+	Interface: "interface",
+	New:       "new",
+	Return:    "return",
+	Struct:    "struct",
+	Switch:    "switch",
+	True:      "true",
+	Type:      "type",
+	Var:       "var",
+	While:     "while",
 }
 
 func (t Token) String() string {
@@ -48,8 +194,30 @@ func (t Token) String() string {
 }
 
 var keywords = map[string]Token{
-	"break": BREAK,
-	"while": WHILE,
+	"as":        As,
+	"break":     Break,
+	"case":      Case,
+	"const":     Const,
+	"continue":  Continue,
+	"default":   Default,
+	"defer":     Defer,
+	"else":      Else,
+	"enum":      Enum,
+	"false":     False,
+	"for":       For,
+	"func":      Func,
+	"if":        If,
+	"import":    Import,
+	"in":        In,
+	"interface": Interface,
+	"new":       New,
+	"return":    Return,
+	"struct":    Struct,
+	"switch":    Switch,
+	"true":      True,
+	"type":      Type,
+	"var":       Var,
+	"while":     While,
 }
 
 // CheckIdentifier maps an identifier to it's keyword token or IDENT if not a keyword
@@ -58,5 +226,5 @@ func CheckIdentifier(ident string) Token {
 		return tok
 	}
 
-	return IDENT
+	return Identifier
 }
