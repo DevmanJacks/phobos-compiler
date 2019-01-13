@@ -132,6 +132,5 @@ func TestScan(t *testing.T) {
 		if lexeme != tt.lexeme {
 			t.Errorf("Scan(\"%s\") expected lexeme: %s, got %s", tt.lexeme, tt.lexeme, lexeme)
 		}
-
 	}
 }

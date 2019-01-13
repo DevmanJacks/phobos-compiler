@@ -95,7 +95,7 @@ func (s *Scanner) scanCharacter() string {
 		}
 	}
 
-	return string(s.src[start : s.offset+1])
+	return string(s.src[start:s.offset])
 }
 
 func (s *Scanner) scanIdentifier() (lexeme string, tok token.Token) {
@@ -105,7 +105,7 @@ func (s *Scanner) scanIdentifier() (lexeme string, tok token.Token) {
 		s.next()
 	}
 
-	lexeme = string(s.src[start : s.offset+1])
+	lexeme = string(s.src[start:s.offset])
 	tok = token.CheckIdentifier(lexeme)
 
 	return lexeme, tok
@@ -154,7 +154,7 @@ func (s *Scanner) scanNumber() (lexeme string, tok token.Token) {
 				// Error - must bave binary digit following 0b
 			}
 
-			return string(s.src[start : s.offset+1]), token.Integer
+			return string(s.src[start:s.offset]), token.Integer
 
 		case 'x', 'X':
 			s.next()
@@ -165,7 +165,7 @@ func (s *Scanner) scanNumber() (lexeme string, tok token.Token) {
 				// Error - must bave hex digit following 0x
 			}
 
-			return string(s.src[start : s.offset+1]), token.Integer
+			return string(s.src[start:s.offset]), token.Integer
 		}
 	}
 
@@ -197,7 +197,7 @@ func (s *Scanner) scanNumber() (lexeme string, tok token.Token) {
 		tok = token.Float
 	}
 
-	return string(s.src[start : s.offset+1]), tok
+	return string(s.src[start:s.offset]), tok
 }
 
 func (s *Scanner) scanString() string {
@@ -218,12 +218,20 @@ func (s *Scanner) scanString() string {
 		// Error - end of file in string
 	}
 
-	return string(s.src[start : s.offset+1])
+	return string(s.src[start:s.offset])
+}
+
+func (s *Scanner) skipWhitespace() {
+	for s.ch == ' ' || s.ch == '\n' || s.ch == '\t' {
+		s.next()
+	}
 }
 
 // Scan scans the src for the next token.
 func (s *Scanner) Scan() (pos token.Pos, tok token.Token, lexeme string) {
 top:
+	s.skipWhitespace()
+
 	switch {
 	case isLetter(s.ch):
 		lexeme, tok = s.scanIdentifier()
@@ -233,7 +241,8 @@ top:
 
 	default:
 		switch s.ch {
-
+		case -1:
+			lexeme, tok = "", token.EndOfFile
 		case '\'':
 			lexeme, tok = s.scanCharacter(), token.Character
 
@@ -241,24 +250,31 @@ top:
 			lexeme, tok = s.scanString(), token.String
 
 		case '{':
+			s.next()
 			lexeme, tok = "{", token.LeftBrace
 
 		case '}':
+			s.next()
 			lexeme, tok = "}", token.RightBrace
 
 		case '[':
+			s.next()
 			lexeme, tok = "[", token.LeftBracket
 
 		case ']':
+			s.next()
 			lexeme, tok = "]", token.RightBracket
 
 		case '(':
+			s.next()
 			lexeme, tok = "(", token.LeftParenthesis
 
 		case ')':
+			s.next()
 			lexeme, tok = ")", token.RightParenthesis
 
 		case ',':
+			s.next()
 			lexeme, tok = ",", token.Comma
 
 		case '.':

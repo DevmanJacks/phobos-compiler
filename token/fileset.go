@@ -19,3 +19,7 @@ type Fileset struct {
 func (f *Fileset) AddFile(filename string) {
 
 }
+
+// File represents a single source file in a Fileset
+type File struct {
+}

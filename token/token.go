@@ -17,6 +17,7 @@ type Token int
 const (
 	ILLEGAL = iota
 
+	EndOfFile
 	Identifier
 	Integer
 	Float
@@ -101,6 +102,7 @@ const (
 var tokens = []string{
 	ILLEGAL: "ILLEGAL",
 
+	EndOfFile:  "EndOfFile",
 	Identifier: "Identifier",
 	Integer:    "Integer",
 	Float:      "Float",
