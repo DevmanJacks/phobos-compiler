@@ -9,6 +9,7 @@
 package scanner
 
 import (
+	"phobos/source"
 	"phobos/token"
 	"testing"
 )
@@ -122,7 +123,7 @@ func TestScan(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		s := NewScanner(tt.lexeme)
+		s := NewScanner(source.FromString(tt.lexeme))
 		_, tok, lexeme := s.Scan()
 
 		if tok != tt.tok {

@@ -9,12 +9,14 @@
 package scanner
 
 import (
+	"phobos/source"
 	"phobos/token"
 )
 
 // Scanner represents a scanner for the phobos language.
 type Scanner struct {
-	src []uint8
+	source *source.Source
+	src    []uint8
 
 	// Scanning state
 	ch     int8
@@ -22,13 +24,22 @@ type Scanner struct {
 }
 
 // NewScanner creates a new scanner to tokenise the src.
-func NewScanner(src string) *Scanner {
+func NewScanner(src *source.Source) *Scanner {
 	s := new(Scanner)
-	s.src = []uint8(src)
+	s.source = src
+	s.src = src.Code()
 	s.ch = '~'
 	s.offset = -1
 	s.next()
 	return s
+}
+
+func (s *Scanner) error(offset int, message string) {
+	Error(s.source.Pos(offset), message)
+}
+
+func (s *Scanner) addLine() {
+	s.source.AddLine(s.source.Pos(s.offset))
 }
 
 // Read the next ascii character from the source into s.ch (s.ch == -1 means EOF).
@@ -38,11 +49,12 @@ func (s *Scanner) next() {
 		s.offset++
 
 		if s.src[s.offset] > 127 {
-			// Error - illegal character
+			s.error(s.offset, "Illegal character '"+string(s.src[s.offset])+"'.")
 		}
 
 		s.ch = int8(s.src[s.offset])
 	} else {
+		s.offset = len(s.src)
 		s.ch = -1
 	}
 }
@@ -63,7 +75,7 @@ func (s *Scanner) scanEscape(c int8) {
 		if s.ch == 'n' || s.ch == 'r' || s.ch == 't' || s.ch == '\\' || s.ch == c {
 			s.next()
 		} else {
-			// Error - unsupported escape sequence
+			s.error(s.offset, "Unsupported escape sequence '\\"+string(s.ch)+"'.")
 		}
 	}
 }
@@ -81,17 +93,21 @@ func (s *Scanner) scanCharacter() string {
 	if s.ch == '\'' {
 		s.next()
 	} else {
-		// Error - unexpected character in character literal
-		s.next()
-
-		for s.ch != '\'' && s.ch != -1 {
-			s.next()
-		}
-
-		if s.ch == '"' {
-			s.next()
+		if s.ch == -1 {
+			s.error(start, "End of file encountered in character literal.")
 		} else {
-			// Error - end of file in character literal
+			s.error(start, "Unexpected character in character literal '"+string(s.ch)+"'.")
+			s.next()
+
+			for s.ch != '\'' && s.ch != -1 {
+				s.next()
+			}
+
+			if s.ch == '\'' {
+				s.next()
+			} else {
+				s.error(start, "End of file encountered in character literal.")
+			}
 		}
 	}
 
@@ -112,6 +128,8 @@ func (s *Scanner) scanIdentifier() (lexeme string, tok token.Token) {
 }
 
 func (s *Scanner) scanInteger(base int) {
+	offset := s.offset
+
 	switch base {
 	case 2:
 		for isBinaryDigit(s.ch) || s.ch == '_' {
@@ -129,7 +147,7 @@ func (s *Scanner) scanInteger(base int) {
 		}
 
 	default:
-		// Error - unsupported base
+		s.error(offset, "Illegal character in integer literal '"+string(s.ch)+"'.  Valid prefixes are 0b, 0B, 0x and 0X.")
 	}
 }
 
@@ -151,7 +169,7 @@ func (s *Scanner) scanNumber() (lexeme string, tok token.Token) {
 			if isBinaryDigit(s.ch) {
 				s.scanInteger(2)
 			} else {
-				// Error - must bave binary digit following 0b
+				s.error(start, "Illegal character '"+string(s.ch)+"' in binary integer literal.")
 			}
 
 			return string(s.src[start:s.offset]), token.Integer
@@ -162,7 +180,7 @@ func (s *Scanner) scanNumber() (lexeme string, tok token.Token) {
 			if isHexDigit(s.ch) {
 				s.scanInteger(16)
 			} else {
-				// Error - must bave hex digit following 0x
+				s.error(start, "Illegal character '"+string(s.ch)+"' in hexadecimal integer literal.")
 			}
 
 			return string(s.src[start:s.offset]), token.Integer
@@ -191,7 +209,7 @@ func (s *Scanner) scanNumber() (lexeme string, tok token.Token) {
 		if isDigit(s.ch) {
 			s.scanInteger(10)
 		} else {
-			// Error - Illegal character in floating point exponent
+			s.error(start, "Illegal character '"+string(s.ch)+"' in floating point exponent.")
 		}
 
 		tok = token.Float
@@ -215,7 +233,7 @@ func (s *Scanner) scanString() string {
 	if s.ch == '"' {
 		s.next()
 	} else {
-		// Error - end of file in string
+		s.error(start, "End of file encountered in string literal.")
 	}
 
 	return string(s.src[start:s.offset])
@@ -223,14 +241,20 @@ func (s *Scanner) scanString() string {
 
 func (s *Scanner) skipWhitespace() {
 	for s.ch == ' ' || s.ch == '\n' || s.ch == '\t' {
-		s.next()
+		if s.ch == '\n' {
+			s.next()
+			s.addLine()
+		} else {
+			s.next()
+		}
 	}
 }
 
 // Scan scans the src for the next token.
-func (s *Scanner) Scan() (pos token.Pos, tok token.Token, lexeme string) {
+func (s *Scanner) Scan() (pos source.Pos, tok token.Token, lexeme string) {
 top:
 	s.skipWhitespace()
+	pos = s.source.Pos(s.offset)
 
 	switch {
 	case isLetter(s.ch):
@@ -341,6 +365,7 @@ top:
 					s.next()
 				}
 
+				s.addLine()
 				goto top
 			} else {
 				lexeme, tok = "/", token.Divide

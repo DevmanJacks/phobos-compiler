@@ -24,6 +24,22 @@ type Parser struct {
 	lexeme string
 }
 
+// First sets
+var firstDecl = map[token.Token]bool{
+	token.Const: true,
+	token.Func:  true,
+	token.Type:  true,
+	token.Var:   true,
+}
+
+var firstExpr = map[token.Token]bool{
+	token.Asterisk: true,
+}
+
+var firstStmt = map[token.Token]bool{
+	token.If: true,
+}
+
 // NewParser creates a parser to parse the phobos language
 func NewParser(file token.File) *Parser {
 	p := new(Parser)
@@ -34,13 +50,13 @@ func (p *Parser) nextToken() {
 	p.pos, p.tok, p.lexeme = p.scanner.Scan()
 }
 
-func (p *Parser) parseIdentifier() ast.Ident {
+func (p *Parser) parseIdentifier() *ast.Ident {
 	return ast.NewIdent(p.pos, p.lexeme)
 }
 
-func (p *Parser) parseDecl() ast.Decl {
-	pos, tok, lexeme := p.s.Scan()
-	return ast.Decl{}
+func (p *Parser) parseDecl() *ast.Decl {
+	p.nextToken()
+	return nil
 }
 
 // Parse the source file and build an AST
