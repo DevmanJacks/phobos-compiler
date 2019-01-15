@@ -1,0 +1,9 @@
+Decl = TypeDecl .
+
+TypeDecl = "type" ident TypeSpec .
+
+TypeSpec = EnumType .
+
+EnumType = "enum" "{" { EnumItem } "}" .
+
+EnumItem = ident [ "=" Expr ] [ "," ] .

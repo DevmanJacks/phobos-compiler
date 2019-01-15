@@ -8,21 +8,27 @@
 
 package ast
 
-import "phobos/token"
+import (
+	"fmt"
+	"phobos/source"
+)
 
 // Node represents a node in the AST
 type Node interface {
-	Start() token.Pos
-	End() token.Pos
+	String() string
 }
 
 // Ident represents an identifier
 type Ident struct {
-	pos  token.Pos
-	name string
+	Pos  source.Pos
+	Name string
 }
 
 // NewIdent instantiates an identifier node with the specified information
-func NewIdent(pos token.Pos, name string) *Ident {
-	return &Ident{pos: pos, name: name}
+func NewIdent(pos source.Pos, name string) *Ident {
+	return &Ident{Pos: pos, Name: name}
+}
+
+func (i *Ident) String() string {
+	return fmt.Sprintf("{ \"Name\": %s", i.Name)
 }

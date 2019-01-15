@@ -35,7 +35,7 @@ func NewScanner(src *source.Source) *Scanner {
 }
 
 func (s *Scanner) error(offset int, message string) {
-	Error(s.source.Pos(offset), message)
+	source.Error(s.source.Pos(offset), message)
 }
 
 func (s *Scanner) addLine() {
@@ -69,13 +69,15 @@ func (s *Scanner) peek() int8 {
 
 // c contans ' for a character literal and " for a string literal
 func (s *Scanner) scanEscape(c int8) {
+	offset := s.offset
+
 	if s.ch == '\\' {
 		s.next()
 
 		if s.ch == 'n' || s.ch == 'r' || s.ch == 't' || s.ch == '\\' || s.ch == c {
 			s.next()
 		} else {
-			s.error(s.offset, "Unsupported escape sequence '\\"+string(s.ch)+"'.")
+			s.error(offset, "Unsupported escape sequence '\\"+string(s.ch)+"'.")
 		}
 	}
 }

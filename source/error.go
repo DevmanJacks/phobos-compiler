@@ -6,27 +6,29 @@
 //
 ////////////////////////////////////////////////////////////
 
-package scanner
+package source
 
 import (
 	"fmt"
-	"phobos/source"
 )
 
 type error struct {
-	pos     source.Pos
+	pos     Pos
 	message string
 }
 
 // Errors is the list of errors encountered so far
 var errors []error
 
+// ErrorCount is the number of errors encountered during compilation
+var ErrorCount int
+
 const maxErrorsBeforeTermination = 10
 
 // Error records a lexical, syntax or semantic error
-func Error(pos source.Pos, message string) {
+func Error(pos Pos, message string) {
 	errors = append(errors, error{pos, message})
-
+	ErrorCount++
 }
 
 // PrintErrors prints all errors that have been generated during scanning, parsing and type resolution
