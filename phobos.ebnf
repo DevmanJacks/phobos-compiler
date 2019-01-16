@@ -1,9 +1,51 @@
-Decl = TypeDecl .
+// EBNF for Phobos language
 
-TypeDecl = "type" ident TypeSpec .
+Decl = TypeDecl | VarDecl .
 
-TypeSpec = EnumType .
+TypeDecl = "type" TypeName Type .
+
+TypeName = identifier .
+
+Type = ArrayType | EnumType | NameType | SliceType .
+
+ArrayType = "[" ArrayLength "]" ElementType .
+
+ElementType = Type .
 
 EnumType = "enum" "{" { EnumItem } "}" .
 
-EnumItem = ident [ "=" Expr ] [ "," ] .
+EnumItem = identifier [ "=" Expr ] [ "," ] .
+
+NameType = identifier { "." identifier } .
+
+SliceType = "[" "]" ElementType .
+
+VarDecl = "var" IdentifierList ( ":" Type [ "=" ExpressionList ] | "=" ExpressionList ) .
+
+IdentifierList = identifier { "," identifier } .
+
+ExpressionList = Expression { "," Expression } .
+
+Expression = UnaryExpression | Expression BinaryOperator Expression .
+
+UnaryExpression = Operand .
+
+Operand = ( BasicLiteral | CompositeLiteral | identifier ) { Selector } .
+
+BasicLiteral = string_literal .
+
+CompositeLiteral = LiteralType LiteralValue .
+
+LiteralType = ArrayType .
+
+LiteralValue = "{" { Element [ "," ] } "}" .
+
+Element = [ Key "=" ] ( Expression | LiteralValue ) .
+
+Key = Index .
+
+Index = "[" Expression "]" .
+
+Selector = "." identifier .
+
+BinaryOperator = .

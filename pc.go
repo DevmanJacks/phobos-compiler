@@ -30,5 +30,8 @@ func main() {
 
 	for _, decl := range decls {
 		fmt.Print(decl.String())
+		fmt.Print(" ")
 	}
+
+	fmt.Print("\n\n")
 }

@@ -9,8 +9,7 @@
 package ast
 
 import (
-	"fmt"
-	"phobos/source"
+	"strings"
 )
 
 // Node represents a node in the AST
@@ -18,17 +17,25 @@ type Node interface {
 	String() string
 }
 
-// Ident represents an identifier
-type Ident struct {
-	Pos  source.Pos
-	Name string
+// Pair represents a name and an expression.  This is used in struct and array literals, function parameters, function returns.
+// Name will be nil if the literal is un-named.
+type Pair struct {
+	Name *Ident
+	Expr Expr
 }
 
-// NewIdent instantiates an identifier node with the specified information
-func NewIdent(pos source.Pos, name string) *Ident {
-	return &Ident{Pos: pos, Name: name}
-}
+func (p *Pair) String() string {
+	s := strings.Builder{}
+	s.WriteString("(NameValuePair ")
 
-func (i *Ident) String() string {
-	return fmt.Sprintf("{ \"Name\": %s", i.Name)
+	if p.Name == nil {
+		s.WriteString("()")
+	} else {
+		s.WriteString(p.Name.String())
+	}
+
+	s.WriteString(" ")
+	s.WriteString(p.Expr.String())
+	s.WriteString("")
+	return s.String()
 }
