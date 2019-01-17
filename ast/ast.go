@@ -17,16 +17,15 @@ type Node interface {
 	String() string
 }
 
-// Pair represents a name and an expression.  This is used in struct and array literals, function parameters, function returns.
-// Name will be nil if the literal is un-named.
-type Pair struct {
+// Parameter represents an imput parameter or a return parameter for a function
+type Parameter struct {
 	Name *Ident
-	Expr Expr
+	Type Expr
 }
 
-func (p *Pair) String() string {
+func (p *Parameter) String() string {
 	s := strings.Builder{}
-	s.WriteString("(NameValuePair ")
+	s.WriteString("(Parameter ")
 
 	if p.Name == nil {
 		s.WriteString("()")
@@ -34,8 +33,47 @@ func (p *Pair) String() string {
 		s.WriteString(p.Name.String())
 	}
 
-	s.WriteString(" ")
-	s.WriteString(p.Expr.String())
-	s.WriteString("")
+	s.WriteRune(' ')
+	s.WriteString(p.Type.String())
+	s.WriteRune(')')
 	return s.String()
+}
+
+// Signature represents a functions parameters and returns
+type Signature struct {
+	Params  []*Parameter
+	Returns []*Parameter
+}
+
+func (s *Signature) String() string {
+	str := strings.Builder{}
+	str.WriteString("(Signature (")
+	first := true
+
+	for _, param := range s.Params {
+		if first {
+			first = false
+		} else {
+			str.WriteRune(' ')
+		}
+
+		str.WriteString(param.String())
+	}
+
+	str.WriteString(") (")
+	first = true
+
+	for _, param := range s.Returns {
+		if first {
+			first = false
+		} else {
+			str.WriteRune(' ')
+		}
+
+		str.WriteString(param.String())
+	}
+
+	str.WriteString("))")
+
+	return str.String()
 }

@@ -39,11 +39,46 @@ type ConstDecl struct {
 	Value Expr
 }
 
+func (d *ConstDecl) declNode() {}
+
+// FuncDecl represents a function declaration
+type FuncDecl struct {
+	MethodType *Ident
+	Name       *Ident
+	Signature  *Signature
+	Body       *BlockStmt
+}
+
+func (d *FuncDecl) declNode() {}
+
+// String gives a human readable form of a VarDecl
+func (d *FuncDecl) String() string {
+	s := strings.Builder{}
+	s.WriteString("(FuncDecl ")
+
+	if d.MethodType == nil {
+		s.WriteString("()")
+	} else {
+		s.WriteString(d.MethodType.String())
+	}
+
+	s.WriteString(" ")
+	s.WriteString(d.Name.String())
+	s.WriteString(" ")
+	s.WriteString(d.Signature.String())
+	s.WriteString(" ")
+	s.WriteString(d.Body.String())
+	s.WriteString(")")
+	return s.String()
+}
+
 // TypeDecl represents a type declaration
 type TypeDecl struct {
 	Name *Ident
 	Spec Expr
 }
+
+func (d *TypeDecl) declNode() {}
 
 // String gives a human readable form of a TypeDecl
 func (d *TypeDecl) String() string {
@@ -56,6 +91,8 @@ type VarDecl struct {
 	Type   Expr
 	Values []Expr
 }
+
+func (d *VarDecl) declNode() {}
 
 // String gives a human readable form of a VarDecl
 func (d *VarDecl) String() string {
@@ -98,8 +135,3 @@ func (d *VarDecl) String() string {
 	s.WriteString("))")
 	return s.String()
 }
-
-// Decl interface declarations
-func (d *ConstDecl) declNode() {}
-func (d *TypeDecl) declNode()  {}
-func (d *VarDecl) declNode()   {}

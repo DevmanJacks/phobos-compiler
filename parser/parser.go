@@ -26,12 +26,16 @@ type Parser struct {
 	pos    source.Pos
 	tok    token.Token
 	lexeme string
+
+	compositeAllowed bool
 }
 
 // NewParser creates a parser to parse the phobos language
 func NewParser(filename string) *Parser {
 	p := new(Parser)
 	p.scanner = scanner.NewScanner(source.FromFile(filename))
+	p.compositeAllowed = true
+
 	p.nextToken()
 	return p
 }
@@ -71,7 +75,16 @@ func (p *Parser) expect(tok token.Token) bool {
 	return false
 }
 
-func (p *Parser) expectToken(validTokens map[token.Token]bool, consumeToken bool) {
+func (p *Parser) match(tok token.Token) bool {
+	if p.tok == tok {
+		p.nextToken()
+		return true
+	}
+
+	return false
+}
+
+func (p *Parser) matchOrSynchronize(validTokens map[token.Token]bool, consumeToken bool) {
 	if validTokens[p.tok] {
 		if consumeToken {
 			p.nextToken()
@@ -103,15 +116,6 @@ func (p *Parser) expectToken(validTokens map[token.Token]bool, consumeToken bool
 	message.WriteRune('.')
 	error(p.pos, message.String())
 	p.synchronize(validTokens)
-}
-
-func (p *Parser) match(tok token.Token) bool {
-	if p.tok == tok {
-		p.nextToken()
-		return true
-	}
-
-	return false
 }
 
 func (p *Parser) nextToken() {
@@ -164,7 +168,7 @@ func (p *Parser) parseOperand() ast.Expr {
 	case token.Identifier, token.LeftBracket:
 		expr = p.parseType()
 
-		if p.match(token.LeftBrace) {
+		if p.compositeAllowed && p.match(token.LeftBrace) {
 			var elements []*ast.Element
 
 			for !p.match(token.RightBrace) && p.tok != token.EndOfFile {
@@ -256,9 +260,9 @@ func (p *Parser) parseArrayType() ast.Expr {
 
 	if length == nil {
 		return &ast.SliceType{BaseType: baseType}
-	} else {
-		return &ast.ArrayType{Length: length, BaseType: baseType}
 	}
+
+	return &ast.ArrayType{Length: length, BaseType: baseType}
 }
 
 func (p *Parser) parseEnumType() ast.Expr {
@@ -297,7 +301,130 @@ func (p *Parser) parseType() ast.Expr {
 	}
 }
 
+// ========== Statements ==========
+
+func (p *Parser) parseBlockStmt() ast.Stmt {
+	p.expect(token.LeftBrace)
+	var stmts []ast.Stmt
+
+	for p.tok != token.RightBrace && p.tok != token.EndOfFile {
+		stmts = append(stmts, p.parseStatement())
+	}
+
+	if p.tok == token.EndOfFile {
+		error(p.pos, "Unexpected end of file in block.")
+	} else {
+		p.expect(token.RightBrace)
+	}
+
+	return &ast.BlockStmt{Statements: stmts}
+}
+
+func (p *Parser) parseStatement() ast.Stmt {
+	switch p.tok {
+	default:
+		p.notImplemented("parseStatement")
+		return nil
+	}
+}
+
 // ========== Declarations ==========
+
+func (p *Parser) parseParameter(nameRequired bool) *ast.Parameter {
+	pos := p.pos
+	expr := p.parseExpression()
+	var name *ast.Ident
+	var typ ast.Expr
+
+	if p.match(token.Colon) {
+		typ = p.parseExpression()
+
+		if ident, ok := expr.(*ast.Ident); ok {
+			name = ident
+		} else {
+			error(pos, "Expected a parameter name.")
+		}
+	} else {
+		typ = expr.(*ast.Ident)
+	}
+
+	return &ast.Parameter{Name: name, Type: typ}
+}
+
+func (p *Parser) parseSignature() *ast.Signature {
+	p.matchOrSynchronize(map[token.Token]bool{token.LeftParenthesis: true}, true)
+
+	var params []*ast.Parameter
+	var returns []*ast.Parameter
+
+	for p.tok != token.RightParenthesis && p.tok != token.EndOfFile {
+		params = append(params, p.parseParameter(true))
+		p.match(token.Comma) // Optional ,
+	}
+
+	if p.tok == token.EndOfFile {
+		error(p.pos, "Unexpected end of file in function signature.")
+	} else {
+		p.expect(token.RightParenthesis)
+
+		if p.match(token.Returns) {
+			p.compositeAllowed = false
+
+			if p.match(token.LeftParenthesis) {
+				for p.tok != token.RightParenthesis && p.tok != token.EndOfFile {
+					returns = append(returns, p.parseParameter(false))
+					p.match(token.Comma)
+				}
+
+				if p.tok == token.EndOfFile {
+					error(p.pos, "Unexpected end of file in function signature.")
+				} else {
+					p.expect(token.RightParenthesis)
+				}
+			} else {
+				returns = append(returns, p.parseParameter(false))
+			}
+
+			p.compositeAllowed = true
+		}
+	}
+
+	return &ast.Signature{Params: params, Returns: returns}
+}
+
+func (p *Parser) parseFuncDecl() ast.Decl {
+	pos := p.pos // func keyword Pos
+	p.nextToken()
+
+	if p.tok == token.Identifier {
+		var methodType *ast.Ident
+		name := p.parseIdentifier()
+
+		if p.match(token.Dot) {
+			if p.tok == token.Identifier {
+				methodType = name
+				name = p.parseIdentifier()
+				signature := p.parseSignature()
+				body := p.parseBlockStmt()
+				return &ast.FuncDecl{MethodType: methodType, Name: name, Signature: signature, Body: body.(*ast.BlockStmt)}
+			}
+
+			error(p.pos, "Expected method name.")
+
+			if p.tok == token.LeftParenthesis { // Just mathod name missing
+				p.parseSignature()
+				p.parseBlockStmt()
+				return &ast.BadDecl{From: pos, To: p.pos}
+			}
+
+			// TODO: recover - don't know where to yet
+		}
+	}
+
+	p.expect(token.Identifier)
+	// TODO: recover
+	return &ast.BadDecl{From: pos, To: p.pos}
+}
 
 func (p *Parser) parseTypeDecl() ast.Decl {
 	pos := p.pos // type keyword Pos
@@ -350,9 +477,12 @@ func (p *Parser) parseVarDecl() ast.Decl {
 
 func (p *Parser) parseDecl() ast.Decl {
 	// Synchronize to a valid declaration keyword
-	p.expectToken(firstDecl, false)
+	p.matchOrSynchronize(firstDecl, false)
 
 	switch p.tok {
+	case token.Func:
+		return p.parseFuncDecl()
+
 	case token.Type:
 		return p.parseTypeDecl()
 
