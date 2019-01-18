@@ -21,6 +21,25 @@ type Expr interface {
 	exprNode()
 }
 
+func expressionListAsString(exprs []Expr) string {
+	s := strings.Builder{}
+	s.WriteRune('(')
+	first := true
+
+	for _, expr := range exprs {
+		if first {
+			first = false
+		} else {
+			s.WriteString(" ")
+		}
+
+		s.WriteString(expr.String())
+	}
+
+	s.WriteRune(')')
+	return s.String()
+}
+
 // BadExpr represents a bad expression
 type BadExpr struct {
 	From, To source.Pos
@@ -98,6 +117,25 @@ type Ident struct {
 	Name string
 }
 
+func identListAsString(idents []*Ident) string {
+	s := strings.Builder{}
+	s.WriteRune('(')
+	first := true
+
+	for _, ident := range idents {
+		if first {
+			first = false
+		} else {
+			s.WriteString(" ")
+		}
+
+		s.WriteString(ident.String())
+	}
+
+	s.WriteRune(')')
+	return s.String()
+}
+
 func (i *Ident) exprNode() {}
 
 func (i *Ident) String() string {
@@ -106,13 +144,18 @@ func (i *Ident) String() string {
 
 // IndexExpr represents an index node in the AST
 type IndexExpr struct {
+	Expr  Expr
 	Index Expr
 }
 
 func (e *IndexExpr) exprNode() {}
 
 func (e *IndexExpr) String() string {
-	return fmt.Sprintf("(IndexExpr %s)", e.Index.String())
+	if e.Expr == nil {
+		return fmt.Sprintf("(IndexExpr %s)", e.Index.String())
+	} else {
+		return fmt.Sprintf("(IndexExpr %s %s)", e.Expr.String(), e.Index.String())
+	}
 }
 
 // LiteralExpr represents a character, float, integer or string literal node in the AST
@@ -207,4 +250,15 @@ func (t *SliceType) exprNode() {}
 
 func (t *SliceType) String() string {
 	return fmt.Sprintf("(SliceType %s)", t.BaseType.String())
+}
+
+// StructType represents a struct type node in the AST
+type StructType struct {
+	Fields []*Field
+}
+
+func (t *StructType) exprNode() {}
+
+func (t *StructType) String() string {
+	return fmt.Sprintf("(StructType %s)", fieldListAsString(t.Fields))
 }

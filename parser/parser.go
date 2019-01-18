@@ -42,10 +42,11 @@ func NewParser(filename string) *Parser {
 
 // First sets
 var firstDecl = map[token.Token]bool{
-	token.Const: true,
-	token.Func:  true,
-	token.Type:  true,
-	token.Var:   true,
+	token.Const:  true,
+	token.Func:   true,
+	token.Import: true,
+	token.Type:   true,
+	token.Var:    true,
 }
 
 var followExpr = map[token.Token]bool{}
@@ -196,7 +197,7 @@ func (p *Parser) parseOperand() ast.Expr {
 				}
 
 				elements = append(elements, &ast.Element{Key: key, Value: value})
-				p.match(token.Comma)
+				p.expect(token.Comma)
 			}
 
 			expr = &ast.CompositeExpr{Type: expr, Elements: elements}
@@ -207,9 +208,17 @@ func (p *Parser) parseOperand() ast.Expr {
 		return nil
 	}
 
-	for p.tok == token.Dot {
-		p.nextToken()
-		expr = &ast.SelectorExpr{Expr: expr, Name: p.parseIdentifier()}
+	for p.tok == token.Dot || p.tok == token.LeftBracket {
+		switch p.tok {
+		case token.Dot:
+			p.nextToken()
+			expr = &ast.SelectorExpr{Expr: expr, Name: p.parseIdentifier()}
+
+		case token.LeftBracket:
+			p.nextToken()
+			expr = &ast.IndexExpr{Expr: expr, Index: p.parseExpression()}
+			p.expect(token.RightBracket)
+		}
 	}
 
 	return expr
@@ -231,7 +240,7 @@ func (p *Parser) parseExpression() ast.Expr {
 	return p.parseBinaryExpr(0)
 }
 
-func (p *Parser) parseExprList() []ast.Expr {
+func (p *Parser) parseExpressionList() []ast.Expr {
 	exprs := []ast.Expr{}
 
 	for {
@@ -278,10 +287,40 @@ func (p *Parser) parseEnumType() ast.Expr {
 
 		if p.expect(token.RightBrace) {
 			return &ast.EnumType{EnumPos: enumPos, Items: items}
+		} else {
+			error(p.pos, "Unexpected end of file in enum.")
 		}
 	}
 
 	return &ast.BadExpr{From: enumPos, To: p.pos}
+}
+
+func (p *Parser) parseField() *ast.Field {
+	names := p.parseIdentifierList()
+	p.expect(token.Colon)
+	typ := p.parseType()
+	return &ast.Field{Names: names, Type: typ}
+}
+
+func (p *Parser) parseStructType() ast.Expr {
+	structPos := p.pos
+	p.nextToken()
+
+	if p.expect(token.LeftBrace) {
+		var fields []*ast.Field
+
+		for p.tok != token.RightBrace && p.tok != token.EndOfFile {
+			fields = append(fields, p.parseField())
+		}
+
+		if p.expect(token.RightBrace) {
+			return &ast.StructType{Fields: fields}
+		} else {
+			error(p.pos, "Unexpected end of file in struct.")
+		}
+	}
+
+	return &ast.BadExpr{From: structPos, To: p.pos}
 }
 
 func (p *Parser) parseType() ast.Expr {
@@ -294,6 +333,9 @@ func (p *Parser) parseType() ast.Expr {
 
 	case token.LeftBracket:
 		return p.parseArrayType()
+
+	case token.Struct:
+		return p.parseStructType()
 
 	default:
 		p.notImplemented("parseType")
@@ -320,8 +362,16 @@ func (p *Parser) parseBlockStmt() ast.Stmt {
 	return &ast.BlockStmt{Statements: stmts}
 }
 
+func (p *Parser) parseReturnStmt() ast.Stmt {
+	p.nextToken()
+	return &ast.ReturnStmt{Expressions: p.parseExpressionList()}
+}
+
 func (p *Parser) parseStatement() ast.Stmt {
 	switch p.tok {
+	case token.Return:
+		return p.parseReturnStmt()
+
 	default:
 		p.notImplemented("parseStatement")
 		return nil
@@ -426,6 +476,11 @@ func (p *Parser) parseFuncDecl() ast.Decl {
 	return &ast.BadDecl{From: pos, To: p.pos}
 }
 
+func (p *Parser) parseImportDecl() ast.Decl {
+	p.nextToken()
+	return &ast.ImportDecl{Package: p.parseExpression()}
+}
+
 func (p *Parser) parseTypeDecl() ast.Decl {
 	pos := p.pos // type keyword Pos
 	p.nextToken()
@@ -463,7 +518,7 @@ func (p *Parser) parseVarDecl() ast.Decl {
 
 		if p.tok == token.Assign {
 			p.nextToken()
-			exprs = p.parseExprList()
+			exprs = p.parseExpressionList()
 		} else if identType == nil {
 			p.expect(token.Assign)
 		}
@@ -482,6 +537,9 @@ func (p *Parser) parseDecl() ast.Decl {
 	switch p.tok {
 	case token.Func:
 		return p.parseFuncDecl()
+
+	case token.Import:
+		return p.parseImportDecl()
 
 	case token.Type:
 		return p.parseTypeDecl()
@@ -510,6 +568,6 @@ func (p *Parser) Parse() []ast.Decl {
 
 func (p *Parser) notImplemented(fnName string) {
 	source.PrintErrors()
-	fmt.Printf("\nFATAL ERROR: Token '%s' not implemented in %s().\n\n", p.tok.String(), fnName)
+	fmt.Printf("\n%s: FATAL ERROR: Token '%s' not implemented in %s().\n\n", p.pos.String(), p.tok.String(), fnName)
 	os.Exit(1)
 }

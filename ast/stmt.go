@@ -43,3 +43,14 @@ func (s *BlockStmt) String() string {
 	str.WriteString("))")
 	return str.String()
 }
+
+// ReturnStmt represents a return statement node in the AST
+type ReturnStmt struct {
+	Expressions []Expr
+}
+
+func (s *ReturnStmt) stmtNode() {}
+
+func (s *ReturnStmt) String() string {
+	return "(ReturnStmt " + expressionListAsString(s.Expressions) + ")"
+}

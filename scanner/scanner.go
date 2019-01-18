@@ -367,7 +367,6 @@ top:
 					s.next()
 				}
 
-				s.addLine()
 				goto top
 			} else {
 				lexeme, tok = "/", token.Divide

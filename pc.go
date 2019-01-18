@@ -21,7 +21,7 @@ func main() {
 	// 	fmt.Printf("%s: %s #%s#\n", pos.String(), tok.String(), lexeme)
 	// }
 
-	p := parser.NewParser("/Users/mark/mars/Phobos/Token/Token.p")
+	p := parser.NewParser("/Users/mark/mars/Phobos/Source/Source.p")
 	decls := p.Parse()
 
 	if source.ErrorCount > 0 {

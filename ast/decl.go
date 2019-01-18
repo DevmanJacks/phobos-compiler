@@ -72,6 +72,18 @@ func (d *FuncDecl) String() string {
 	return s.String()
 }
 
+// ImportDecl represents an import declaration
+type ImportDecl struct {
+	Package Expr
+}
+
+func (d *ImportDecl) declNode() {}
+
+// String gives a human readable form of a TypeDecl
+func (d *ImportDecl) String() string {
+	return fmt.Sprintf("(ImportDecl %s)", d.Package.String())
+}
+
 // TypeDecl represents a type declaration
 type TypeDecl struct {
 	Name *Ident
@@ -97,21 +109,9 @@ func (d *VarDecl) declNode() {}
 // String gives a human readable form of a VarDecl
 func (d *VarDecl) String() string {
 	s := strings.Builder{}
-	s.WriteString("(VarDecl (")
-
-	first := true
-
-	for _, name := range d.Names {
-		if first {
-			first = false
-		} else {
-			s.WriteString(", ")
-		}
-
-		s.WriteString(name.String())
-	}
-
-	s.WriteString(") ")
+	s.WriteString("(VarDecl ")
+	s.WriteString(identListAsString(d.Names))
+	s.WriteRune(' ')
 
 	if d.Type == nil {
 		s.WriteString("()")
@@ -119,19 +119,8 @@ func (d *VarDecl) String() string {
 		s.WriteString(d.Type.String())
 	}
 
-	s.WriteString(" (")
-	first = true
-
-	for _, value := range d.Values {
-		if first {
-			first = false
-		} else {
-			s.WriteString(", ")
-		}
-
-		s.WriteString(value.String())
-	}
-
-	s.WriteString("))")
+	s.WriteRune(' ')
+	s.WriteString(expressionListAsString(d.Values))
+	s.WriteString(")")
 	return s.String()
 }

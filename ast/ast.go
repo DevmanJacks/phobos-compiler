@@ -17,6 +17,43 @@ type Node interface {
 	String() string
 }
 
+// Field represents a field within a structure type
+type Field struct {
+	Names []*Ident
+	Type  Expr
+}
+
+func fieldListAsString(fields []*Field) string {
+	s := strings.Builder{}
+	s.WriteRune('(')
+	first := true
+
+	for _, field := range fields {
+		if first {
+			first = false
+		} else {
+			s.WriteString(" ")
+		}
+
+		s.WriteString(field.String())
+	}
+
+	s.WriteRune(')')
+	return s.String()
+}
+
+func (f *Field) exprNode() {}
+
+func (f *Field) String() string {
+	s := strings.Builder{}
+	s.WriteString("(Field ")
+	s.WriteString(identListAsString(f.Names))
+	s.WriteRune(' ')
+	s.WriteString(f.Type.String())
+	s.WriteRune(')')
+	return s.String()
+}
+
 // Parameter represents an imput parameter or a return parameter for a function
 type Parameter struct {
 	Name *Ident

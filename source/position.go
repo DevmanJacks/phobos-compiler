@@ -32,15 +32,19 @@ func (p Pos) String() string {
 					break
 				} else if p < s.lines[index] {
 					end = index - 1
-					line = start
-				} else {
-					start = index + 1
 					line = end
+				} else {
+					line = start
+					start = index + 1
 				}
 			}
 
+			if line >= len(s.lines) {
+				line = len(s.lines) - 1
+			}
+
 			column := p - s.lines[line] + 1
-			return fmt.Sprintf("%s:%d:%d", s.filename, line, column)
+			return fmt.Sprintf("%s:%d:%d", s.filename, line+1, column)
 		}
 	}
 

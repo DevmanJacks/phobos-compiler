@@ -1,12 +1,40 @@
 // EBNF for Phobos language
 
-Decl = TypeDecl | VarDecl .
+Decl = FuncDecl | ImportDecl | TypeDecl | VarDecl .
+
+FuncDecl = "func" [MethodType "."] Name Signature Body .
+
+MethodType = identifier .
+
+Name = identifier .
+
+Signature = "(" [ ParameterList ] ")" [ "->" Returns ] .
+
+ParameterList = Parameter { "," Parameter } .
+
+Parameter = Name ":" Type .
+
+Returns = Return | "(" Return { "," Return } ")" .
+
+Return = [ Name ":" ] Type .
+
+Body = Block .
+
+Block = "{" { Statement } "}" .
+
+Statement = ReturnStatement .
+
+ReturnStatement = "return" [ ExpressionList ] .
+
+ImportDecl = "import" QualifiedIdentifier .
+
+QualifiedIdentifier = identifier { "." identifier } .
 
 TypeDecl = "type" TypeName Type .
 
 TypeName = identifier .
 
-Type = ArrayType | EnumType | NameType | SliceType .
+Type = ArrayType | EnumType | NameType | SliceType | StructType .
 
 ArrayType = "[" ArrayLength "]" ElementType .
 
@@ -19,6 +47,10 @@ EnumItem = identifier [ "=" Expr ] [ "," ] .
 NameType = identifier { "." identifier } .
 
 SliceType = "[" "]" ElementType .
+
+StructType = "struct" "{" { Field } "}" .
+
+Field = Name ":" Type [ "=" Expression ] .
 
 VarDecl = "var" IdentifierList ( ":" Type [ "=" ExpressionList ] | "=" ExpressionList ) .
 
@@ -38,7 +70,9 @@ CompositeLiteral = LiteralType LiteralValue .
 
 LiteralType = ArrayType .
 
-LiteralValue = "{" { Element [ "," ] } "}" .
+LiteralValue = "{" ElementList "}" .
+
+ElementList = { Element "," } | Element { "," Element } .
 
 Element = [ Key "=" ] ( Expression | LiteralValue ) .
 
