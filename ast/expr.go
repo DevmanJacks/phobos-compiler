@@ -54,9 +54,32 @@ func (e *BadExpr) String() string {
 
 // BinaryExpr represents a binary expression node in the AST
 type BinaryExpr struct {
-	left  Expr
-	op    token.Token
-	right Expr
+	Left  Expr
+	Op    token.Token
+	Right Expr
+}
+
+func (e *BinaryExpr) exprNode() {}
+
+// String gives a human readable form of a BadExpr
+func (e *BinaryExpr) String() string {
+	return fmt.Sprintf("(BinaryExpr %s %s %s)", e.Left.String(), e.Op.String(), e.Right.String())
+}
+
+// BoolLiteralExpr represents a boolean true or false literal node in the AST
+type BoolLiteralExpr struct {
+	Op token.Token
+}
+
+func (e *BoolLiteralExpr) exprNode() {}
+
+// String gives a human readable form of a CompositeExpr
+func (e *BoolLiteralExpr) String() string {
+	if e.Op == token.True {
+		return "true"
+	} else {
+		return "false"
+	}
 }
 
 // Element represents a key and value in a composite literal.  Key can be nil
@@ -81,6 +104,19 @@ func (e *Element) String() string {
 	return s.String()
 }
 
+// CallExpr represents an array or struct literal node in the AST
+type CallExpr struct {
+	Name      Expr
+	Arguments []Expr
+}
+
+func (e *CallExpr) exprNode() {}
+
+// String gives a human readable form of a CompositeExpr
+func (e *CallExpr) String() string {
+	return fmt.Sprintf("(CallExpr %s %s)", e.Name.String(), expressionListAsString(e.Arguments))
+}
+
 // CompositeExpr represents an array or struct literal node in the AST
 type CompositeExpr struct {
 	Type     Expr
@@ -93,7 +129,13 @@ func (e *CompositeExpr) exprNode() {}
 func (e *CompositeExpr) String() string {
 	s := strings.Builder{}
 	s.WriteString("(CompositeExpr ")
-	s.WriteString(e.Type.String())
+
+	if e.Type == nil {
+		s.WriteString("()")
+	} else {
+		s.WriteString(e.Type.String())
+	}
+
 	s.WriteString(" (")
 	first := true
 
@@ -171,6 +213,18 @@ func (e *LiteralExpr) String() string {
 	return fmt.Sprintf("(LiteralExpr %s %s)", e.Kind.String(), e.Value)
 }
 
+// NewExpr represents a new expression node in the AST
+type NewExpr struct {
+	Type Expr
+}
+
+func (e *NewExpr) exprNode() {}
+
+// String gives a human readable form of a CompositeExpr
+func (e *NewExpr) String() string {
+	return fmt.Sprintf("(NewExpr %s)", e.Type.String())
+}
+
 // SelectorExpr represents a selector node in the AST
 type SelectorExpr struct {
 	Expr Expr
@@ -183,10 +237,17 @@ func (e *SelectorExpr) String() string {
 	return fmt.Sprintf("(SelectorExpr %s %s)", e.Expr.String(), e.Name.String())
 }
 
-// EnumItem represents a single item in an enum type
-type EnumItem struct {
-	Name  *Ident
-	Value Expr
+// UnaryExpr represents a unary expression node in the AST
+type UnaryExpr struct {
+	Op         token.Token
+	Expression Expr
+}
+
+func (e *UnaryExpr) exprNode() {}
+
+// String gives a human readable form of a UnaryExpr
+func (e *UnaryExpr) String() string {
+	return fmt.Sprintf("(UnaryExpr %s %s)", e.Op.String(), e.Expression.String())
 }
 
 // ArrayType represents an array type node in the AST
@@ -199,6 +260,12 @@ func (t *ArrayType) exprNode() {}
 
 func (t *ArrayType) String() string {
 	return fmt.Sprintf("(ArrayType %s %s)", t.Length.String(), t.BaseType.String())
+}
+
+// EnumItem represents a single item in an enum type
+type EnumItem struct {
+	Name  *Ident
+	Value Expr
 }
 
 // String gives a human readable form of a EnumItem
@@ -239,6 +306,17 @@ func (t *EnumType) String() string {
 	s.WriteString("))")
 
 	return s.String()
+}
+
+// PointerType represents a pointer type node in the AST
+type PointerType struct {
+	BaseType Expr
+}
+
+func (t *PointerType) exprNode() {}
+
+func (t *PointerType) String() string {
+	return fmt.Sprintf("(PointerType %s)", t.BaseType.String())
 }
 
 // SliceType represents a slice type node in the AST

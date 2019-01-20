@@ -21,7 +21,7 @@ func main() {
 	// 	fmt.Printf("%s: %s #%s#\n", pos.String(), tok.String(), lexeme)
 	// }
 
-	p := parser.NewParser("/Users/mark/mars/Phobos/Source/Source.p")
+	p := parser.NewParser("/Users/mark/mars/RaspberryPiEmulator/ARM1176JZF-S.p")
 	decls := p.Parse()
 
 	if source.ErrorCount > 0 {

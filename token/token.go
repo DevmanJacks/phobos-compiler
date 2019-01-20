@@ -35,31 +35,17 @@ const (
 	Returns
 	Dot
 	DotDot
-	Assign
-	DeclareAssign
 
 	Asterisk
 	Divide
-	Minus
 	Mod
-	Plus
-
-	BitwiseAnd
-	BitwiseOr
-	BitwiseNot
 	ShiftLeft
 	ShiftRight
+	BitwiseAnd
 
-	DivideEquals
-	MinusEquals
-	ModEquals
-	MultiplyEquals
-	PlusEquals
-	BitwiseAndEquals
-	BitwiseOrEquals
-	BitwiseNotEquals
-	ShiftLeftEquals
-	ShiftRightEquals
+	Plus
+	Minus
+	BitwiseOr
 
 	Equal
 	NotEqual
@@ -70,7 +56,22 @@ const (
 
 	LogicalAnd
 	LogicalOr
+
+	BitwiseNot
 	Not
+
+	Assign
+	DeclareAssign
+	DivideEquals
+	MinusEquals
+	ModEquals
+	MultiplyEquals
+	PlusEquals
+	BitwiseAndEquals
+	BitwiseOrEquals
+	BitwiseNotEquals
+	ShiftLeftEquals
+	ShiftRightEquals
 
 	As
 	Break
@@ -120,31 +121,19 @@ var tokens = []string{
 	Returns:          "->",
 	Dot:              ".",
 	DotDot:           "..",
-	Assign:           "=",
-	DeclareAssign:    ":=",
 
-	Asterisk: "*",
-	Divide:   "/",
-	Minus:    "-",
-	Mod:      "%",
-	Plus:     "+",
-
-	BitwiseAnd: "&",
-	BitwiseOr:  "|",
-	BitwiseNot: "~",
+	// Precedence 5
+	Asterisk:   "*",
+	Divide:     "/",
+	Mod:        "%",
 	ShiftLeft:  "<<",
 	ShiftRight: ">>",
+	BitwiseAnd: "&",
 
-	DivideEquals:     "/=",
-	MinusEquals:      "-=",
-	ModEquals:        "%=",
-	MultiplyEquals:   "*=",
-	PlusEquals:       "+=",
-	BitwiseAndEquals: "&=",
-	BitwiseOrEquals:  "|=",
-	BitwiseNotEquals: "~=",
-	ShiftLeftEquals:  "<<=",
-	ShiftRightEquals: ">>=",
+	// Precedence 4
+	Plus:      "+",
+	Minus:     "-",
+	BitwiseOr: "|",
 
 	Equal:              "==",
 	NotEqual:           "!=",
@@ -155,7 +144,22 @@ var tokens = []string{
 
 	LogicalAnd: "&&",
 	LogicalOr:  "||",
+
+	BitwiseNot: "~",
 	Not:        "!",
+
+	Assign:           "=",
+	DeclareAssign:    ":=",
+	DivideEquals:     "/=",
+	MinusEquals:      "-=",
+	ModEquals:        "%=",
+	MultiplyEquals:   "*=",
+	PlusEquals:       "+=",
+	BitwiseAndEquals: "&=",
+	BitwiseOrEquals:  "|=",
+	BitwiseNotEquals: "~=",
+	ShiftLeftEquals:  "<<=",
+	ShiftRightEquals: ">>=",
 
 	As:        "as",
 	Break:     "break",
@@ -183,6 +187,16 @@ var tokens = []string{
 	While:     "while",
 }
 
+// IsAssignOp determines if the token is a valid assignment operator
+func (t Token) IsAssignOp() bool {
+	return Assign <= t && t <= ShiftRightEquals
+}
+
+// IsBinaryOp determines if the token is a valid binary operator
+func (t Token) IsBinaryOp() bool {
+	return Asterisk <= t && t <= LogicalOr
+}
+
 func (t Token) String() string {
 	s := ""
 
@@ -193,6 +207,23 @@ func (t Token) String() string {
 	}
 
 	return s
+}
+
+// OperatorPrecedence determines the precedence of the operator token.  If the token is not an operator it has precedence 1
+func (t Token) OperatorPrecedence() int {
+	if Asterisk <= t && t <= BitwiseAnd {
+		return 5
+	}
+
+	if Plus <= t && t <= BitwiseOr {
+		return 4
+	}
+
+	if Equal <= t && t <= GreaterThanOrEqual {
+		return 3
+	}
+
+	return 1
 }
 
 var keywords = map[string]Token{

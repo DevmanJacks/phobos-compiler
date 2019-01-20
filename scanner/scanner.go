@@ -373,33 +373,25 @@ top:
 			}
 
 		case '+':
-			if isDigit(s.peek()) {
-				lexeme, tok = s.scanNumber()
-			} else {
-				s.next()
+			s.next()
 
-				if s.ch == '=' {
-					s.next()
-					lexeme, tok = "+=", token.PlusEquals
-				} else {
-					lexeme, tok = "+", token.Plus
-				}
+			if s.ch == '=' {
+				s.next()
+				lexeme, tok = "+=", token.PlusEquals
+			} else {
+				lexeme, tok = "+", token.Plus
 			}
 
 		case '-':
-			if isDigit(s.peek()) {
-				lexeme, tok = s.scanNumber()
-			} else {
+			s.next()
+			if s.ch == '>' {
 				s.next()
-				if s.ch == '>' {
-					s.next()
-					lexeme, tok = "->", token.Returns
-				} else if s.ch == '=' {
-					s.next()
-					lexeme, tok = "-=", token.MinusEquals
-				} else {
-					lexeme, tok = "-", token.Minus
-				}
+				lexeme, tok = "->", token.Returns
+			} else if s.ch == '=' {
+				s.next()
+				lexeme, tok = "-=", token.MinusEquals
+			} else {
+				lexeme, tok = "-", token.Minus
 			}
 
 		case '%':
@@ -435,6 +427,7 @@ top:
 			s.next()
 
 			if s.ch == '=' {
+				s.next()
 				lexeme, tok = ">=", token.GreaterThanOrEqual
 			} else if s.ch == '>' {
 				s.next()

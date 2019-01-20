@@ -41,6 +41,25 @@ type ConstDecl struct {
 
 func (d *ConstDecl) declNode() {}
 
+// String gives a human readable form of a VarDecl
+func (d *ConstDecl) String() string {
+	s := strings.Builder{}
+	s.WriteString("(ConstDecl ")
+	s.WriteString(d.Name.String())
+	s.WriteRune(' ')
+
+	if d.Type == nil {
+		s.WriteString("()")
+	} else {
+		s.WriteString(d.Type.String())
+	}
+
+	s.WriteRune(' ')
+	s.WriteString(d.Value.String())
+	s.WriteString(")")
+	return s.String()
+}
+
 // FuncDecl represents a function declaration
 type FuncDecl struct {
 	MethodType *Ident

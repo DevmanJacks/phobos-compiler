@@ -34,6 +34,6 @@ func Error(pos Pos, message string) {
 // PrintErrors prints all errors that have been generated during scanning, parsing and type resolution
 func PrintErrors() {
 	for _, err := range errors {
-		fmt.Printf("%s: %s", err.pos.String(), err.message)
+		fmt.Printf("%s: %s\n", err.pos.String(), err.message)
 	}
 }

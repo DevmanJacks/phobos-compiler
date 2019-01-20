@@ -55,6 +55,14 @@ var firstStmt = map[token.Token]bool{
 	token.If: true,
 }
 
+var firstType = map[token.Token]bool{
+	token.Const:  true,
+	token.Func:   true,
+	token.Import: true,
+	token.Type:   true,
+	token.Var:    true,
+}
+
 func error(pos source.Pos, message string) {
 	source.Error(pos, message)
 }
@@ -163,11 +171,21 @@ func (p *Parser) parseOperand() ast.Expr {
 	var expr ast.Expr
 
 	switch p.tok {
+	case token.Asterisk:
+		expr = p.parsePointerType()
+
+	case token.Minus, token.Plus, token.Not, token.BitwiseAnd, token.BitwiseNot:
+		op := p.tok
+		p.nextToken()
+		expr = &ast.UnaryExpr{Op: op, Expression: p.parseExpression()}
+
 	case token.Character, token.Float, token.Integer, token.String:
 		expr = p.parseLiteralExpression()
 
-	case token.Identifier, token.LeftBracket:
-		expr = p.parseType()
+	case token.Identifier, token.LeftBrace, token.LeftBracket:
+		if p.tok != token.LeftBrace {
+			expr = p.parseType()
+		}
 
 		if p.compositeAllowed && p.match(token.LeftBrace) {
 			var elements []*ast.Element
@@ -189,7 +207,7 @@ func (p *Parser) parseOperand() ast.Expr {
 						p.nextToken()
 						value = p.parseExpression()
 					} else {
-						expr = key
+						value = key
 						key = nil
 					}
 				} else {
@@ -197,18 +215,34 @@ func (p *Parser) parseOperand() ast.Expr {
 				}
 
 				elements = append(elements, &ast.Element{Key: key, Value: value})
-				p.expect(token.Comma)
+
+				if p.tok != token.RightBrace && p.tok != token.EndOfFile {
+					p.expect(token.Comma)
+				}
 			}
 
 			expr = &ast.CompositeExpr{Type: expr, Elements: elements}
 		}
+
+	case token.LeftParenthesis:
+		p.nextToken()
+		expr = p.parseExpression()
+		p.expect(token.RightParenthesis)
+
+	case token.New:
+		p.nextToken()
+		expr = &ast.NewExpr{Type: p.parseType()}
+
+	case token.True, token.False:
+		expr = &ast.BoolLiteralExpr{Op: p.tok}
+		p.nextToken()
 
 	default:
 		p.notImplemented("parseOperand")
 		return nil
 	}
 
-	for p.tok == token.Dot || p.tok == token.LeftBracket {
+	for p.tok == token.Dot || p.tok == token.LeftBracket || p.tok == token.LeftParenthesis {
 		switch p.tok {
 		case token.Dot:
 			p.nextToken()
@@ -218,6 +252,17 @@ func (p *Parser) parseOperand() ast.Expr {
 			p.nextToken()
 			expr = &ast.IndexExpr{Expr: expr, Index: p.parseExpression()}
 			p.expect(token.RightBracket)
+
+		case token.LeftParenthesis:
+			p.nextToken()
+
+			if p.tok == token.RightParenthesis {
+				expr = &ast.CallExpr{Name: expr}
+			} else {
+				expr = &ast.CallExpr{Name: expr, Arguments: p.parseExpressionList()}
+			}
+
+			p.expect(token.RightParenthesis)
 		}
 	}
 
@@ -226,6 +271,16 @@ func (p *Parser) parseOperand() ast.Expr {
 
 func (p *Parser) parseBinaryExpr(precidenceLevel int) ast.Expr {
 	expr := p.parseOperand()
+
+	for p.tok.IsBinaryOp() {
+		if p.tok.OperatorPrecedence() > precidenceLevel {
+			op := p.tok
+			p.nextToken()
+			expr = &ast.BinaryExpr{Left: expr, Op: op, Right: p.parseBinaryExpr(p.tok.OperatorPrecedence())}
+		} else {
+			break
+		}
+	}
 
 	return expr
 }
@@ -295,6 +350,11 @@ func (p *Parser) parseEnumType() ast.Expr {
 	return &ast.BadExpr{From: enumPos, To: p.pos}
 }
 
+func (p *Parser) parsePointerType() ast.Expr {
+	p.nextToken()
+	return &ast.PointerType{BaseType: p.parseType()}
+}
+
 func (p *Parser) parseField() *ast.Field {
 	names := p.parseIdentifierList()
 	p.expect(token.Colon)
@@ -325,6 +385,9 @@ func (p *Parser) parseStructType() ast.Expr {
 
 func (p *Parser) parseType() ast.Expr {
 	switch p.tok {
+	case token.Asterisk:
+		return p.parsePointerType()
+
 	case token.Enum:
 		return p.parseEnumType()
 
@@ -345,7 +408,30 @@ func (p *Parser) parseType() ast.Expr {
 
 // ========== Statements ==========
 
-func (p *Parser) parseBlockStmt() ast.Stmt {
+func (p *Parser) parseAssignmentOrCall() ast.Stmt {
+	start := p.pos
+	lhs := p.parseExpressionList()
+
+	if p.tok.IsAssignOp() {
+		assignPos := p.pos
+		assignToken := p.tok
+		p.nextToken()
+		rhs := p.parseExpressionList()
+		return &ast.AssignStmt{LHS: lhs, TokenPos: assignPos, Token: assignToken, RHS: rhs}
+	} else {
+		if len(lhs) == 1 {
+			if call, ok := lhs[0].(*ast.CallExpr); ok {
+				return &ast.ExprStmt{Expression: call}
+			}
+		}
+
+		error(start, "Expected assignment or call.")
+	}
+
+	return &ast.BadStmt{From: start, To: p.pos}
+}
+
+func (p *Parser) parseBlockStatement() ast.Stmt {
 	p.expect(token.LeftBrace)
 	var stmts []ast.Stmt
 
@@ -362,15 +448,142 @@ func (p *Parser) parseBlockStmt() ast.Stmt {
 	return &ast.BlockStmt{Statements: stmts}
 }
 
-func (p *Parser) parseReturnStmt() ast.Stmt {
+func (p *Parser) parseDeferStatement() ast.Stmt {
+	p.nextToken()
+	return &ast.DeferStmt{Statement: p.parseStatement()}
+}
+
+func (p *Parser) parseForStatement() ast.Stmt {
+	p.nextToken()
+	index := p.parseIdentifier()
+	var item *ast.Ident
+
+	if p.tok == token.Comma {
+		p.nextToken()
+		item = p.parseIdentifier()
+	}
+
+	p.expect(token.In)
+	p.compositeAllowed = false
+	collection := p.parseExpression()
+	p.compositeAllowed = true
+	body := p.parseBlockStatement()
+	return &ast.ForStmt{Index: index, Item: item, Collection: collection, Body: body}
+}
+
+func (p *Parser) parseIfStatement() ast.Stmt {
+	start := p.pos
+	p.nextToken()
+	p.compositeAllowed = false
+	expr := p.parseExpression()
+	p.compositeAllowed = true
+	block := p.parseBlockStatement()
+
+	if p.tok == token.Else {
+		p.nextToken()
+		if p.tok == token.If || p.tok == token.LeftBrace {
+			return &ast.IfStmt{Expression: expr, Block: block, ElseStmt: p.parseStatement()}
+		}
+
+		error(p.pos, "Expected 'if' or '{'.")
+		return &ast.BadStmt{From: start, To: p.pos}
+	}
+
+	return &ast.IfStmt{Expression: expr, Block: block}
+}
+
+func (p *Parser) parseReturnStatement() ast.Stmt {
 	p.nextToken()
 	return &ast.ReturnStmt{Expressions: p.parseExpressionList()}
 }
 
+func (p *Parser) parseCaseClause() *ast.CaseClause {
+	p.nextToken()
+	exprs := p.parseExpressionList()
+	p.expect(token.Colon)
+
+	var stmts []ast.Stmt
+
+	for p.tok != token.Case && p.tok != token.Default && p.tok != token.RightBrace && p.tok != token.EndOfFile {
+		stmts = append(stmts, p.parseStatement())
+	}
+
+	return &ast.CaseClause{Expressions: exprs, Statements: stmts}
+}
+
+func (p *Parser) parseSwitchStatement() ast.Stmt {
+	p.nextToken()
+	p.compositeAllowed = false
+	expr := p.parseExpression()
+	p.compositeAllowed = true
+	p.expect(token.LeftBrace)
+
+	gotDefault := false
+	var defaults []ast.Stmt
+	var clauses []*ast.CaseClause
+
+	for p.tok == token.Case || p.tok == token.Default {
+		if p.tok == token.Case {
+			clauses = append(clauses, p.parseCaseClause())
+		} else if p.tok == token.Default {
+			if gotDefault {
+				error(p.pos, "Default clause already specified.")
+			} else {
+				p.nextToken()
+				p.expect(token.Colon)
+
+				for p.tok != token.Case && p.tok != token.Default && p.tok != token.RightBrace && p.tok != token.EndOfFile {
+					defaults = append(defaults, p.parseStatement())
+				}
+
+				gotDefault = true
+			}
+		} else {
+			error(p.pos, "Expected 'case' or 'default'.")
+		}
+	}
+
+	p.expect(token.RightBrace)
+	return &ast.SwitchStmt{Expression: expr, CaseClauses: clauses, DefaultStatements: defaults}
+}
+
+func (p *Parser) parseWhileStatement() ast.Stmt {
+	p.nextToken()
+	p.compositeAllowed = false
+	expr := p.parseExpression()
+	p.compositeAllowed = true
+	body := p.parseBlockStatement()
+	return &ast.WhileStmt{Expression: expr, Body: body}
+}
+
 func (p *Parser) parseStatement() ast.Stmt {
 	switch p.tok {
+	case token.Const, token.Type, token.Var:
+		return &ast.DeclStmt{Declaration: p.parseDecl()}
+
+	case token.Defer:
+		return p.parseDeferStatement()
+
+	case token.For:
+		return p.parseForStatement()
+
+	case token.Identifier:
+		return p.parseAssignmentOrCall()
+
+	case token.If:
+		return p.parseIfStatement()
+
+	case token.LeftBrace:
+		return p.parseBlockStatement()
+
 	case token.Return:
-		return p.parseReturnStmt()
+		return p.parseReturnStatement()
+
+	case token.Switch:
+		return p.parseSwitchStatement()
+
+	case token.While:
+		return p.parseWhileStatement()
 
 	default:
 		p.notImplemented("parseStatement")
@@ -379,6 +592,33 @@ func (p *Parser) parseStatement() ast.Stmt {
 }
 
 // ========== Declarations ==========
+
+func (p *Parser) parseConstDecl() ast.Decl {
+	pos := p.pos // const keyword Pos
+	p.nextToken()
+
+	if p.tok == token.Identifier {
+		name := p.parseIdentifier()
+
+		var identType ast.Expr
+
+		if p.tok == token.Colon {
+			p.nextToken()
+			identType = p.parseType()
+		} else if p.tok == token.Identifier {
+			error(p.pos, "Expected ':' before type.")
+			identType = p.parseType()
+		}
+
+		p.expect(token.Assign)
+		value := p.parseExpression()
+
+		return &ast.ConstDecl{Name: name, Type: identType, Value: value}
+	}
+
+	p.expect(token.Identifier)
+	return &ast.BadDecl{From: pos, To: p.pos}
+}
 
 func (p *Parser) parseParameter(nameRequired bool) *ast.Parameter {
 	pos := p.pos
@@ -395,7 +635,7 @@ func (p *Parser) parseParameter(nameRequired bool) *ast.Parameter {
 			error(pos, "Expected a parameter name.")
 		}
 	} else {
-		typ = expr.(*ast.Ident)
+		typ = expr
 	}
 
 	return &ast.Parameter{Name: name, Type: typ}
@@ -447,15 +687,14 @@ func (p *Parser) parseFuncDecl() ast.Decl {
 	p.nextToken()
 
 	if p.tok == token.Identifier {
-		var methodType *ast.Ident
 		name := p.parseIdentifier()
 
 		if p.match(token.Dot) {
 			if p.tok == token.Identifier {
-				methodType = name
+				methodType := name
 				name = p.parseIdentifier()
 				signature := p.parseSignature()
-				body := p.parseBlockStmt()
+				body := p.parseBlockStatement()
 				return &ast.FuncDecl{MethodType: methodType, Name: name, Signature: signature, Body: body.(*ast.BlockStmt)}
 			}
 
@@ -463,11 +702,15 @@ func (p *Parser) parseFuncDecl() ast.Decl {
 
 			if p.tok == token.LeftParenthesis { // Just mathod name missing
 				p.parseSignature()
-				p.parseBlockStmt()
+				p.parseBlockStatement()
 				return &ast.BadDecl{From: pos, To: p.pos}
 			}
 
 			// TODO: recover - don't know where to yet
+		} else {
+			signature := p.parseSignature()
+			body := p.parseBlockStatement()
+			return &ast.FuncDecl{Name: name, Signature: signature, Body: body.(*ast.BlockStmt)}
 		}
 	}
 
@@ -508,6 +751,7 @@ func (p *Parser) parseVarDecl() ast.Decl {
 		var identType ast.Expr
 
 		if p.tok == token.Colon {
+			p.nextToken()
 			identType = p.parseType()
 		} else if p.tok == token.Identifier {
 			error(p.pos, "Expected ':' before type.")
@@ -535,6 +779,9 @@ func (p *Parser) parseDecl() ast.Decl {
 	p.matchOrSynchronize(firstDecl, false)
 
 	switch p.tok {
+	case token.Const:
+		return p.parseConstDecl()
+
 	case token.Func:
 		return p.parseFuncDecl()
 
