@@ -47,6 +47,9 @@ type BadExpr struct {
 
 func (e *BadExpr) exprNode() {}
 
+// Resolve does nothing
+func (e *BadExpr) Resolve() {}
+
 // String gives a human readable form of a BadExpr
 func (e *BadExpr) String() string {
 	return fmt.Sprintf("(BadDecl %d %d)", int(e.From), int(e.To))
@@ -61,6 +64,9 @@ type BinaryExpr struct {
 
 func (e *BinaryExpr) exprNode() {}
 
+// Resolve will perform type checking
+func (e *BinaryExpr) Resolve() {}
+
 // String gives a human readable form of a BadExpr
 func (e *BinaryExpr) String() string {
 	return fmt.Sprintf("(BinaryExpr %s %s %s)", e.Left.String(), e.Op.String(), e.Right.String())
@@ -72,6 +78,9 @@ type BoolLiteralExpr struct {
 }
 
 func (e *BoolLiteralExpr) exprNode() {}
+
+// Resolve does nothing
+func (e *BoolLiteralExpr) Resolve() {}
 
 // String gives a human readable form of a CompositeExpr
 func (e *BoolLiteralExpr) String() string {
@@ -112,6 +121,9 @@ type CallExpr struct {
 
 func (e *CallExpr) exprNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (e *CallExpr) Resolve() {}
+
 // String gives a human readable form of a CompositeExpr
 func (e *CallExpr) String() string {
 	return fmt.Sprintf("(CallExpr %s %s)", e.Name.String(), expressionListAsString(e.Arguments))
@@ -124,6 +136,9 @@ type CompositeExpr struct {
 }
 
 func (e *CompositeExpr) exprNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (e *CompositeExpr) Resolve() {}
 
 // String gives a human readable form of a CompositeExpr
 func (e *CompositeExpr) String() string {
@@ -180,6 +195,9 @@ func identListAsString(idents []*Ident) string {
 
 func (i *Ident) exprNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (i *Ident) Resolve() {}
+
 func (i *Ident) String() string {
 	return fmt.Sprintf("(Ident %s)", i.Name)
 }
@@ -191,6 +209,9 @@ type IndexExpr struct {
 }
 
 func (e *IndexExpr) exprNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (e *IndexExpr) Resolve() {}
 
 func (e *IndexExpr) String() string {
 	if e.Expr == nil {
@@ -209,6 +230,9 @@ type LiteralExpr struct {
 
 func (e *LiteralExpr) exprNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (e *LiteralExpr) Resolve() {}
+
 func (e *LiteralExpr) String() string {
 	return fmt.Sprintf("(LiteralExpr %s %s)", e.Kind.String(), e.Value)
 }
@@ -219,6 +243,9 @@ type NewExpr struct {
 }
 
 func (e *NewExpr) exprNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (e *NewExpr) Resolve() {}
 
 // String gives a human readable form of a CompositeExpr
 func (e *NewExpr) String() string {
@@ -233,6 +260,9 @@ type SelectorExpr struct {
 
 func (e *SelectorExpr) exprNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (e *SelectorExpr) Resolve() {}
+
 func (e *SelectorExpr) String() string {
 	return fmt.Sprintf("(SelectorExpr %s %s)", e.Expr.String(), e.Name.String())
 }
@@ -244,6 +274,9 @@ type UnaryExpr struct {
 }
 
 func (e *UnaryExpr) exprNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (e *UnaryExpr) Resolve() {}
 
 // String gives a human readable form of a UnaryExpr
 func (e *UnaryExpr) String() string {
@@ -257,6 +290,9 @@ type ArrayType struct {
 }
 
 func (t *ArrayType) exprNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (t *ArrayType) Resolve() {}
 
 func (t *ArrayType) String() string {
 	return fmt.Sprintf("(ArrayType %s %s)", t.Length.String(), t.BaseType.String())
@@ -288,6 +324,9 @@ type EnumType struct {
 
 func (t *EnumType) exprNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (t *EnumType) Resolve() {}
+
 // String gives a human readable form of a EnumType
 func (t *EnumType) String() string {
 	s := strings.Builder{}
@@ -315,6 +354,9 @@ type PointerType struct {
 
 func (t *PointerType) exprNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (t *PointerType) Resolve() {}
+
 func (t *PointerType) String() string {
 	return fmt.Sprintf("(PointerType %s)", t.BaseType.String())
 }
@@ -326,6 +368,9 @@ type SliceType struct {
 
 func (t *SliceType) exprNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (t *SliceType) Resolve() {}
+
 func (t *SliceType) String() string {
 	return fmt.Sprintf("(SliceType %s)", t.BaseType.String())
 }
@@ -336,6 +381,9 @@ type StructType struct {
 }
 
 func (t *StructType) exprNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (t *StructType) Resolve() {}
 
 func (t *StructType) String() string {
 	return fmt.Sprintf("(StructType %s)", fieldListAsString(t.Fields))

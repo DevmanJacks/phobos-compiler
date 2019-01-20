@@ -14,6 +14,7 @@ import (
 
 // Node represents a node in the AST
 type Node interface {
+	Resolve()
 	String() string
 }
 

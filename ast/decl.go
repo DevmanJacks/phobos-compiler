@@ -27,6 +27,9 @@ type BadDecl struct {
 
 func (d *BadDecl) declNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (d *BadDecl) Resolve() {}
+
 // String gives a human readable form of a TypeDecl
 func (d *BadDecl) String() string {
 	return fmt.Sprintf("(BadDecl %d %d)", d.From, d.To)
@@ -40,6 +43,9 @@ type ConstDecl struct {
 }
 
 func (d *ConstDecl) declNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (d *ConstDecl) Resolve() {}
 
 // String gives a human readable form of a VarDecl
 func (d *ConstDecl) String() string {
@@ -70,6 +76,9 @@ type FuncDecl struct {
 
 func (d *FuncDecl) declNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (d *FuncDecl) Resolve() {}
+
 // String gives a human readable form of a VarDecl
 func (d *FuncDecl) String() string {
 	s := strings.Builder{}
@@ -98,6 +107,9 @@ type ImportDecl struct {
 
 func (d *ImportDecl) declNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (d *ImportDecl) Resolve() {}
+
 // String gives a human readable form of a TypeDecl
 func (d *ImportDecl) String() string {
 	return fmt.Sprintf("(ImportDecl %s)", d.Package.String())
@@ -110,6 +122,9 @@ type TypeDecl struct {
 }
 
 func (d *TypeDecl) declNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (d *TypeDecl) Resolve() {}
 
 // String gives a human readable form of a TypeDecl
 func (d *TypeDecl) String() string {
@@ -124,6 +139,9 @@ type VarDecl struct {
 }
 
 func (d *VarDecl) declNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (d *VarDecl) Resolve() {}
 
 // String gives a human readable form of a VarDecl
 func (d *VarDecl) String() string {

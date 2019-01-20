@@ -31,6 +31,9 @@ type AssignStmt struct {
 
 func (s *AssignStmt) stmtNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (s *AssignStmt) Resolve() {}
+
 func (s *AssignStmt) String() string {
 	str := strings.Builder{}
 	str.WriteString("(AssignStmt ")
@@ -50,6 +53,9 @@ type BadStmt struct {
 
 func (s *BadStmt) stmtNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (s *BadStmt) Resolve() {}
+
 // String gives a human readable form of a TypeDecl
 func (s *BadStmt) String() string {
 	return fmt.Sprintf("(BadStmt %d %d)", s.From, s.To)
@@ -61,6 +67,9 @@ type BlockStmt struct {
 }
 
 func (s *BlockStmt) stmtNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (s *BlockStmt) Resolve() {}
 
 func (s *BlockStmt) String() string {
 	str := strings.Builder{}
@@ -88,6 +97,9 @@ type DeclStmt struct {
 
 func (s *DeclStmt) stmtNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (s *DeclStmt) Resolve() {}
+
 func (s *DeclStmt) String() string {
 	return fmt.Sprintf("(DeclStmt %s)", s.Declaration.String())
 }
@@ -99,6 +111,9 @@ type DeferStmt struct {
 
 func (s *DeferStmt) stmtNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (s *DeferStmt) Resolve() {}
+
 func (s *DeferStmt) String() string {
 	return fmt.Sprintf("(DeferStmt %s)", s.Statement.String())
 }
@@ -109,6 +124,9 @@ type ExprStmt struct {
 }
 
 func (s *ExprStmt) stmtNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (s *ExprStmt) Resolve() {}
 
 func (s *ExprStmt) String() string {
 	return fmt.Sprintf("(ExprStmt %s)", s.Expression.String())
@@ -123,6 +141,9 @@ type ForStmt struct {
 }
 
 func (s *ForStmt) stmtNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (s *ForStmt) Resolve() {}
 
 func (s *ForStmt) String() string {
 	str := strings.Builder{}
@@ -153,6 +174,9 @@ type IfStmt struct {
 
 func (s *IfStmt) stmtNode() {}
 
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (s *IfStmt) Resolve() {}
+
 func (s *IfStmt) String() string {
 	str := strings.Builder{}
 	str.WriteString("(IfStmt ")
@@ -174,6 +198,9 @@ type ReturnStmt struct {
 }
 
 func (s *ReturnStmt) stmtNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (s *ReturnStmt) Resolve() {}
 
 func (s *ReturnStmt) String() string {
 	return "(ReturnStmt " + expressionListAsString(s.Expressions) + ")"
@@ -214,6 +241,9 @@ type SwitchStmt struct {
 }
 
 func (s *SwitchStmt) stmtNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (s *SwitchStmt) Resolve() {}
 
 func (s *SwitchStmt) String() string {
 	str := strings.Builder{}
@@ -258,6 +288,9 @@ type WhileStmt struct {
 }
 
 func (s *WhileStmt) stmtNode() {}
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (s *WhileStmt) Resolve() {}
 
 func (s *WhileStmt) String() string {
 	str := strings.Builder{}

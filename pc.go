@@ -12,7 +12,56 @@ import (
 	"fmt"
 	"phobos/parser"
 	"phobos/source"
+	"strings"
 )
+
+const width = 132
+
+func prettyPrint(s string, indent int) {
+	if len(s) < width {
+		fmt.Print(s)
+	} else {
+		// Line too long so split it on sensible boundary
+		lparenPos := strings.Index(s[1:], "(") + 1
+		indent += lparenPos
+		fmt.Print(s[:lparenPos])
+
+		parenCount := 0
+		completeExpression := false
+		start := 0
+		sub := s[lparenPos:]
+
+		for i, c := range sub {
+			if c == '(' && !completeExpression {
+				parenCount++
+			} else if c == ')' {
+				parenCount--
+
+				if parenCount == 0 {
+					completeExpression = true
+				}
+			} else if completeExpression && c != ' ' && c != ')' {
+				prettyPrint(sub[start:i], indent)
+				fmt.Print("\n")
+
+				// Indent next line
+				for i := 0; i < indent; i++ {
+					fmt.Print(" ")
+				}
+
+				start = i
+				completeExpression = false
+
+				if c == '(' {
+					parenCount++
+				}
+			}
+		}
+
+		prettyPrint(sub[start:], indent)
+		fmt.Print("\n")
+	}
+}
 
 func main() {
 	// s := scanner.NewScanner(source.FromFile("/Users/mark/mars/Phobos/Token/Token.p"))
@@ -21,7 +70,7 @@ func main() {
 	// 	fmt.Printf("%s: %s #%s#\n", pos.String(), tok.String(), lexeme)
 	// }
 
-	p := parser.NewParser("/Users/mark/mars/RaspberryPiEmulator/ARM1176JZF-S.p")
+	p := parser.NewParser("/Users/mark/mars/Phobos/pc.p")
 	decls := p.Parse()
 
 	if source.ErrorCount > 0 {
@@ -29,8 +78,9 @@ func main() {
 	}
 
 	for _, decl := range decls {
-		fmt.Print(decl.String())
-		fmt.Print(" ")
+		s := decl.String()
+		prettyPrint(s, 0)
+		fmt.Print("\n")
 	}
 
 	fmt.Print("\n\n")
