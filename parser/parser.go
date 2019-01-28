@@ -32,8 +32,13 @@ type Parser struct {
 
 // NewParser creates a parser to parse the phobos language
 func NewParser(filename string) *Parser {
+	return NewParserWithScanner(scanner.NewScanner(source.FromFile(filename)))
+}
+
+// NewParserWithScanner creates a parser to parse the phobos language
+func NewParserWithScanner(s *scanner.Scanner) *Parser {
 	p := new(Parser)
-	p.scanner = scanner.NewScanner(source.FromFile(filename))
+	p.scanner = s
 	p.compositeAllowed = true
 
 	p.nextToken()
@@ -146,7 +151,7 @@ func (p *Parser) parseEnumItem() ast.EnumItem {
 // ========== Expressions ==========
 
 func (p *Parser) parseIdentifier() *ast.Ident {
-	ident := &ast.Ident{Pos: p.pos, Name: p.lexeme}
+	ident := &ast.Ident{NamePos: p.pos, Name: p.lexeme}
 	p.nextToken()
 	return ident
 }
@@ -286,7 +291,7 @@ func (p *Parser) parseBinaryExpr(precidenceLevel int) ast.Expr {
 }
 
 func (p *Parser) parseLiteralExpression() ast.Expr {
-	expr := &ast.LiteralExpr{Kind: p.tok, Pos: p.pos, Value: p.lexeme}
+	expr := &ast.LiteralExpr{Kind: p.tok, ValuePos: p.pos, Value: p.lexeme}
 	p.nextToken()
 	return expr
 }
@@ -767,7 +772,7 @@ func (p *Parser) parseVarDecl() ast.Decl {
 			p.expect(token.Assign)
 		}
 
-		return &ast.VarDecl{Names: names, Type: identType, Values: exprs}
+		return &ast.VarDecl{VarPos: pos, Names: names, Type: identType, Values: exprs}
 	}
 
 	p.expect(token.Identifier)

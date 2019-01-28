@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"phobos/parser"
 	"phobos/source"
+	"phobos/symbol"
 	"strings"
 )
 
@@ -64,11 +65,9 @@ func prettyPrint(s string, indent int) {
 }
 
 func main() {
-	// s := scanner.NewScanner(source.FromFile("/Users/mark/mars/Phobos/Token/Token.p"))
-
-	// for pos, tok, lexeme := s.Scan(); tok != token.EndOfFile; pos, tok, lexeme = s.Scan() {
-	// 	fmt.Printf("%s: %s #%s#\n", pos.String(), tok.String(), lexeme)
-	// }
+	// TEMP: Remove these when we get proper initialisation sorted
+	symbol.CurrentScope = symbol.NewScope(nil)
+	symbol.CurrentScope.Insert(symbol.NewSynonymType("Int32"))
 
 	p := parser.NewParser("/Users/mark/mars/Phobos/pc.p")
 	decls := p.Parse()
@@ -78,6 +77,8 @@ func main() {
 	}
 
 	for _, decl := range decls {
+		decl.Resolve()
+
 		s := decl.String()
 		prettyPrint(s, 0)
 		fmt.Print("\n")

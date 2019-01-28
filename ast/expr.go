@@ -11,7 +11,9 @@ package ast
 import (
 	"fmt"
 	"phobos/source"
+	"phobos/symbol"
 	"phobos/token"
+	"strconv"
 	"strings"
 )
 
@@ -19,6 +21,7 @@ import (
 type Expr interface {
 	Node
 	exprNode()
+	ResolvedTypes() []*symbol.Type
 }
 
 func expressionListAsString(exprs []Expr) string {
@@ -47,13 +50,26 @@ type BadExpr struct {
 
 func (e *BadExpr) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (e *BadExpr) GenerateCode() {
+	panic("Cannot generate code for a program with errors")
+}
+
+// Pos returns the start position of the expression in the source
+func (e *BadExpr) Pos() source.Pos { panic("Pos() not implemented for BadExpr") }
+
 // Resolve does nothing
-func (e *BadExpr) Resolve() {}
+func (e *BadExpr) Resolve() { panic("Resolve() not implemented for BadExpr") }
+
+// ResolvedTypes does nothing
+func (e *BadExpr) ResolvedTypes() []*symbol.Type { panic("ResolvedTypes() not implemented for BadExpr") }
 
 // String gives a human readable form of a BadExpr
 func (e *BadExpr) String() string {
 	return fmt.Sprintf("(BadDecl %d %d)", int(e.From), int(e.To))
 }
+
+// ========== Binary Expression ==========
 
 // BinaryExpr represents a binary expression node in the AST
 type BinaryExpr struct {
@@ -64,13 +80,26 @@ type BinaryExpr struct {
 
 func (e *BinaryExpr) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (e *BinaryExpr) GenerateCode() { panic("GenerateCode() not implemented for BinaryExpr") }
+
+// Pos returns the start position of the expression in the source
+func (e *BinaryExpr) Pos() source.Pos { panic("Pos() not implemented for BinaryExpr") }
+
 // Resolve will perform type checking
-func (e *BinaryExpr) Resolve() {}
+func (e *BinaryExpr) Resolve() { panic("Resolve() not implemented for BadExpr") }
+
+// ResolvedTypes does nothing
+func (e *BinaryExpr) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for BinaryExpr")
+}
 
 // String gives a human readable form of a BadExpr
 func (e *BinaryExpr) String() string {
 	return fmt.Sprintf("(BinaryExpr %s %s %s)", e.Left.String(), e.Op.String(), e.Right.String())
 }
+
+// ========== Boolean Literal Expression - true & false ==========
 
 // BoolLiteralExpr represents a boolean true or false literal node in the AST
 type BoolLiteralExpr struct {
@@ -79,8 +108,19 @@ type BoolLiteralExpr struct {
 
 func (e *BoolLiteralExpr) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (e *BoolLiteralExpr) GenerateCode() { panic("GenerateCode() not implemented for BoolLiteralExpr") }
+
+// Pos returns the start position of the expression in the source
+func (e *BoolLiteralExpr) Pos() source.Pos { panic("Pos() not implemented for BoolLiteralExpr") }
+
 // Resolve does nothing
-func (e *BoolLiteralExpr) Resolve() {}
+func (e *BoolLiteralExpr) Resolve() { panic("Resolve() not implemented for BoolLiteralExpr") }
+
+// ResolvedTypes does nothing
+func (e *BoolLiteralExpr) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for BoolLiteralExpr")
+}
 
 // String gives a human readable form of a CompositeExpr
 func (e *BoolLiteralExpr) String() string {
@@ -90,6 +130,37 @@ func (e *BoolLiteralExpr) String() string {
 		return "false"
 	}
 }
+
+// ========== Call Expression ==========
+
+// CallExpr represents an array or struct literal node in the AST
+type CallExpr struct {
+	Name      Expr
+	Arguments []Expr
+}
+
+func (e *CallExpr) exprNode() {}
+
+// GenerateCode will generate C code for the AST node
+func (e *CallExpr) GenerateCode() { panic("GenerateCode() not implemented for CallExpr") }
+
+// Pos returns the start position of the expression in the source
+func (e *CallExpr) Pos() source.Pos { panic("Pos() not implemented for CallExpr") }
+
+// Resolve will infer types for any unspecified identifiers and constants and perform type checking
+func (e *CallExpr) Resolve() { panic("Resolve() not implemented for CallExpr") }
+
+// ResolvedTypes does nothing
+func (e *CallExpr) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for CallExpr")
+}
+
+// String gives a human readable form of a CompositeExpr
+func (e *CallExpr) String() string {
+	return fmt.Sprintf("(CallExpr %s %s)", e.Name.String(), expressionListAsString(e.Arguments))
+}
+
+// ========== Composite Expression ==========
 
 // Element represents a key and value in a composite literal.  Key can be nil
 type Element struct {
@@ -113,22 +184,6 @@ func (e *Element) String() string {
 	return s.String()
 }
 
-// CallExpr represents an array or struct literal node in the AST
-type CallExpr struct {
-	Name      Expr
-	Arguments []Expr
-}
-
-func (e *CallExpr) exprNode() {}
-
-// Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (e *CallExpr) Resolve() {}
-
-// String gives a human readable form of a CompositeExpr
-func (e *CallExpr) String() string {
-	return fmt.Sprintf("(CallExpr %s %s)", e.Name.String(), expressionListAsString(e.Arguments))
-}
-
 // CompositeExpr represents an array or struct literal node in the AST
 type CompositeExpr struct {
 	Type     Expr
@@ -137,8 +192,19 @@ type CompositeExpr struct {
 
 func (e *CompositeExpr) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (e *CompositeExpr) GenerateCode() { panic("GenerateCode() not implemented for CompositeExpr") }
+
+// Pos returns the start position of the expression in the source
+func (e *CompositeExpr) Pos() source.Pos { panic("Pos() not implemented for CompositeExpr") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (e *CompositeExpr) Resolve() {}
+func (e *CompositeExpr) Resolve() { panic("Resolve() not implemented for CompositeExpr") }
+
+// ResolvedTypes does nothing
+func (e *CompositeExpr) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for CompositeExpr")
+}
 
 // String gives a human readable form of a CompositeExpr
 func (e *CompositeExpr) String() string {
@@ -168,10 +234,15 @@ func (e *CompositeExpr) String() string {
 	return s.String()
 }
 
+// ========== Identifier ==========
+
 // Ident represents an identifier
 type Ident struct {
-	Pos  source.Pos
-	Name string
+	NamePos source.Pos
+	Name    string
+
+	// Resolved type
+	Type *symbol.Type
 }
 
 func identListAsString(idents []*Ident) string {
@@ -195,12 +266,25 @@ func identListAsString(idents []*Ident) string {
 
 func (i *Ident) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (i *Ident) GenerateCode() { panic("GenerateCode() not implemented for Ident") }
+
+// Pos returns the start position of the expression in the source
+func (i *Ident) Pos() source.Pos {
+	return i.NamePos
+}
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (i *Ident) Resolve() {}
+func (i *Ident) Resolve() { panic("Resolve() not implemented for Ident") }
+
+// ResolvedTypes does nothing
+func (i *Ident) ResolvedTypes() []*symbol.Type { panic("ResolvedTypes() not implemented for Ident") }
 
 func (i *Ident) String() string {
 	return fmt.Sprintf("(Ident %s)", i.Name)
 }
+
+// ========== Index Expression ==========
 
 // IndexExpr represents an index node in the AST
 type IndexExpr struct {
@@ -210,8 +294,19 @@ type IndexExpr struct {
 
 func (e *IndexExpr) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (e *IndexExpr) GenerateCode() { panic("GenerateCode() not implemented for IndexExpr") }
+
+// Pos returns the start position of the expression in the source
+func (e *IndexExpr) Pos() source.Pos { panic("Pos() not implemented for IndexExpr") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (e *IndexExpr) Resolve() {}
+func (e *IndexExpr) Resolve() { panic("Resolve() not implemented for IndexExpr") }
+
+// ResolvedTypes does nothing
+func (e *IndexExpr) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for IndexExpr")
+}
 
 func (e *IndexExpr) String() string {
 	if e.Expr == nil {
@@ -221,21 +316,51 @@ func (e *IndexExpr) String() string {
 	}
 }
 
+// ========== Literal Expression ==========
+
 // LiteralExpr represents a character, float, integer or string literal node in the AST
 type LiteralExpr struct {
-	Kind  token.Token
-	Pos   source.Pos
-	Value string
+	Kind     token.Token
+	ValuePos source.Pos
+	Value    string
+
+	// Resolved
+	resolvedType *symbol.Type
+	intValue     int
 }
 
 func (e *LiteralExpr) exprNode() {}
 
-// Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (e *LiteralExpr) Resolve() {}
+// GenerateCode will generate C code for the AST node
+func (e *LiteralExpr) GenerateCode() { panic("GenerateCode() not implemented for LiteralExpr") }
+
+// Pos returns the start position of the expression in the source
+func (e *LiteralExpr) Pos() source.Pos {
+	return e.ValuePos
+}
+
+// Resolve will evaluate the literal and set the type appropriately.
+func (e *LiteralExpr) Resolve() {
+	switch e.Kind {
+	case token.Integer:
+		e.intValue, _ = strconv.Atoi(e.Value)
+		e.resolvedType = symbol.CurrentScope.Lookup("Int32").(*symbol.Type)
+
+	default:
+		panic("Token " + e.Kind.String() + " not implemented in Resolve() for LiteralExpr")
+	}
+}
+
+// ResolvedTypes does nothing
+func (e *LiteralExpr) ResolvedTypes() []*symbol.Type {
+	return []*symbol.Type{e.resolvedType}
+}
 
 func (e *LiteralExpr) String() string {
 	return fmt.Sprintf("(LiteralExpr %s %s)", e.Kind.String(), e.Value)
 }
+
+// ========== New Expression ==========
 
 // NewExpr represents a new expression node in the AST
 type NewExpr struct {
@@ -244,13 +369,24 @@ type NewExpr struct {
 
 func (e *NewExpr) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (e *NewExpr) GenerateCode() { panic("GenerateCode() not implemented for NewExpr") }
+
+// Pos returns the start position of the expression in the source
+func (e *NewExpr) Pos() source.Pos { panic("Pos() not implemented for NewExpr") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (e *NewExpr) Resolve() {}
+func (e *NewExpr) Resolve() { panic("Resolve() not implemented for NewExpr") }
+
+// ResolvedTypes does nothing
+func (e *NewExpr) ResolvedTypes() []*symbol.Type { panic("ResolvedTypes() not implemented for NewExpr") }
 
 // String gives a human readable form of a CompositeExpr
 func (e *NewExpr) String() string {
 	return fmt.Sprintf("(NewExpr %s)", e.Type.String())
 }
+
+// ========== Selector Expression ==========
 
 // SelectorExpr represents a selector node in the AST
 type SelectorExpr struct {
@@ -260,12 +396,25 @@ type SelectorExpr struct {
 
 func (e *SelectorExpr) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (e *SelectorExpr) GenerateCode() { panic("GenerateCode() not implemented for SelectorExpr") }
+
+// Pos returns the start position of the expression in the source
+func (e *SelectorExpr) Pos() source.Pos { panic("Pos() not implemented for SelectorExpr") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (e *SelectorExpr) Resolve() {}
+func (e *SelectorExpr) Resolve() { panic("Resolve() not implemented for SelectorExpr") }
+
+// ResolvedTypes does nothing
+func (e *SelectorExpr) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for SelectorExpr")
+}
 
 func (e *SelectorExpr) String() string {
 	return fmt.Sprintf("(SelectorExpr %s %s)", e.Expr.String(), e.Name.String())
 }
+
+// ========== Unary Expr ==========
 
 // UnaryExpr represents a unary expression node in the AST
 type UnaryExpr struct {
@@ -275,13 +424,26 @@ type UnaryExpr struct {
 
 func (e *UnaryExpr) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (e *UnaryExpr) GenerateCode() { panic("GenerateCode() not implemented for UnaryExpr") }
+
+// Pos returns the start position of the expression in the source
+func (e *UnaryExpr) Pos() source.Pos { panic("Pos() not implemented for UnaryExpr") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (e *UnaryExpr) Resolve() {}
+func (e *UnaryExpr) Resolve() { panic("Resolve() not implemented for UnaryExpr") }
+
+// ResolvedTypes does nothing
+func (e *UnaryExpr) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for UnaryExpr")
+}
 
 // String gives a human readable form of a UnaryExpr
 func (e *UnaryExpr) String() string {
 	return fmt.Sprintf("(UnaryExpr %s %s)", e.Op.String(), e.Expression.String())
 }
+
+// ========== Array Type ==========
 
 // ArrayType represents an array type node in the AST
 type ArrayType struct {
@@ -291,12 +453,25 @@ type ArrayType struct {
 
 func (t *ArrayType) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (t *ArrayType) GenerateCode() { panic("GenerateCode() not implemented for ArrayType") }
+
+// Pos returns the start position of the expression in the source
+func (t *ArrayType) Pos() source.Pos { panic("Pos() not implemented for ArrayType") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (t *ArrayType) Resolve() {}
+func (t *ArrayType) Resolve() { panic("Resolve() not implemented for ArrayType") }
+
+// ResolvedTypes does nothing
+func (t *ArrayType) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for ArrayType")
+}
 
 func (t *ArrayType) String() string {
 	return fmt.Sprintf("(ArrayType %s %s)", t.Length.String(), t.BaseType.String())
 }
+
+// ========== Enum Type ==========
 
 // EnumItem represents a single item in an enum type
 type EnumItem struct {
@@ -324,8 +499,19 @@ type EnumType struct {
 
 func (t *EnumType) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (t *EnumType) GenerateCode() { panic("GenerateCode() not implemented for EnumType") }
+
+// Pos returns the start position of the expression in the source
+func (t *EnumType) Pos() source.Pos { panic("Pos() not implemented for EnumType") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (t *EnumType) Resolve() {}
+func (t *EnumType) Resolve() { panic("Resolve() not implemented for EnumType") }
+
+// ResolvedTypes does nothing
+func (t *EnumType) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for EnumType")
+}
 
 // String gives a human readable form of a EnumType
 func (t *EnumType) String() string {
@@ -347,6 +533,8 @@ func (t *EnumType) String() string {
 	return s.String()
 }
 
+// ========== Pointer Type ==========
+
 // PointerType represents a pointer type node in the AST
 type PointerType struct {
 	BaseType Expr
@@ -354,12 +542,25 @@ type PointerType struct {
 
 func (t *PointerType) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (t *PointerType) GenerateCode() { panic("GenerateCode() not implemented for PointerType") }
+
+// Pos returns the start position of the expression in the source
+func (t *PointerType) Pos() source.Pos { panic("Pos() not implemented for PointerType") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (t *PointerType) Resolve() {}
+func (t *PointerType) Resolve() { panic("Resolve() not implemented for PointerType") }
+
+// ResolvedTypes does nothing
+func (t *PointerType) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for PointerType")
+}
 
 func (t *PointerType) String() string {
 	return fmt.Sprintf("(PointerType %s)", t.BaseType.String())
 }
+
+// ========== Slice Type ==========
 
 // SliceType represents a slice type node in the AST
 type SliceType struct {
@@ -368,12 +569,25 @@ type SliceType struct {
 
 func (t *SliceType) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (t *SliceType) GenerateCode() { panic("GenerateCode() not implemented for SliceType") }
+
+// Pos returns the start position of the expression in the source
+func (t *SliceType) Pos() source.Pos { panic("Pos() not implemented for SliceType") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (t *SliceType) Resolve() {}
+func (t *SliceType) Resolve() { panic("Resolve() not implemented for SliceType") }
+
+// ResolvedTypes does nothing
+func (t *SliceType) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for SliceType")
+}
 
 func (t *SliceType) String() string {
 	return fmt.Sprintf("(SliceType %s)", t.BaseType.String())
 }
+
+// ========== Struct Type ==========
 
 // StructType represents a struct type node in the AST
 type StructType struct {
@@ -382,8 +596,19 @@ type StructType struct {
 
 func (t *StructType) exprNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (t *StructType) GenerateCode() { panic("GenerateCode() not implemented for StructType") }
+
+// Pos returns the start position of the expression in the source
+func (t *StructType) Pos() source.Pos { panic("Pos() not implemented for StructType") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
-func (t *StructType) Resolve() {}
+func (t *StructType) Resolve() { panic("Resolve() not implemented for StructType") }
+
+// ResolvedTypes does nothing
+func (t *StructType) ResolvedTypes() []*symbol.Type {
+	panic("ResolvedTypes() not implemented for StructType")
+}
 
 func (t *StructType) String() string {
 	return fmt.Sprintf("(StructType %s)", fieldListAsString(t.Fields))

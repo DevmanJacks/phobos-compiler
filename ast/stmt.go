@@ -21,6 +21,8 @@ type Stmt interface {
 	stmtNode()
 }
 
+// ========== Assignment Statement ==========
+
 // AssignStmt represents an assignment statement node in the AST
 type AssignStmt struct {
 	LHS      []Expr
@@ -30,6 +32,12 @@ type AssignStmt struct {
 }
 
 func (s *AssignStmt) stmtNode() {}
+
+// GenerateCode will generate C code for the AST node
+func (s *AssignStmt) GenerateCode() {}
+
+// Pos returns the start position of the expression in the source
+func (s *AssignStmt) Pos() source.Pos { panic("Pos() not implemented for AssignStmt") }
 
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
 func (s *AssignStmt) Resolve() {}
@@ -46,12 +54,20 @@ func (s *AssignStmt) String() string {
 	return str.String()
 }
 
+// ========== Bad Statement ==========
+
 // BadStmt represents a bad statement
 type BadStmt struct {
 	From, To source.Pos
 }
 
 func (s *BadStmt) stmtNode() {}
+
+// GenerateCode will generate C code for the AST node
+func (s *BadStmt) GenerateCode() { panic("Cannot generate code for a program with errors") }
+
+// Pos returns the start position of the expression in the source
+func (s *BadStmt) Pos() source.Pos { panic("Pos() not implemented for BadStmt") }
 
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
 func (s *BadStmt) Resolve() {}
@@ -61,12 +77,20 @@ func (s *BadStmt) String() string {
 	return fmt.Sprintf("(BadStmt %d %d)", s.From, s.To)
 }
 
+// ========== Block Statement ==========
+
 // BlockStmt represents a block statement node in the AST
 type BlockStmt struct {
 	Statements []Stmt
 }
 
 func (s *BlockStmt) stmtNode() {}
+
+// GenerateCode will generate C code for the AST node
+func (s *BlockStmt) GenerateCode() {}
+
+// Pos returns the start position of the expression in the source
+func (s *BlockStmt) Pos() source.Pos { panic("Pos() not implemented for BlockStmt") }
 
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
 func (s *BlockStmt) Resolve() {}
@@ -90,12 +114,20 @@ func (s *BlockStmt) String() string {
 	return str.String()
 }
 
+// ========== Declaration Statement ==========
+
 // DeclStmt represents a declaration statement node in the AST
 type DeclStmt struct {
 	Declaration Decl
 }
 
 func (s *DeclStmt) stmtNode() {}
+
+// GenerateCode will generate C code for the AST node
+func (s *DeclStmt) GenerateCode() {}
+
+// Pos returns the start position of the expression in the source
+func (s *DeclStmt) Pos() source.Pos { panic("Pos() not implemented for DeclStmt") }
 
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
 func (s *DeclStmt) Resolve() {}
@@ -104,12 +136,20 @@ func (s *DeclStmt) String() string {
 	return fmt.Sprintf("(DeclStmt %s)", s.Declaration.String())
 }
 
+// ========== Defer Statement ==========
+
 // DeferStmt represents a defer statement node in the AST
 type DeferStmt struct {
 	Statement Stmt
 }
 
 func (s *DeferStmt) stmtNode() {}
+
+// GenerateCode will generate C code for the AST node
+func (s *DeferStmt) GenerateCode() {}
+
+// Pos returns the start position of the expression in the source
+func (s *DeferStmt) Pos() source.Pos { panic("Pos() not implemented for DeferStmt") }
 
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
 func (s *DeferStmt) Resolve() {}
@@ -118,6 +158,8 @@ func (s *DeferStmt) String() string {
 	return fmt.Sprintf("(DeferStmt %s)", s.Statement.String())
 }
 
+// ========== Expression Statement ==========
+
 // ExprStmt represents an expression statement node in the AST
 type ExprStmt struct {
 	Expression Expr
@@ -125,12 +167,20 @@ type ExprStmt struct {
 
 func (s *ExprStmt) stmtNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (s *ExprStmt) GenerateCode() {}
+
+// Pos returns the start position of the expression in the source
+func (s *ExprStmt) Pos() source.Pos { panic("Pos() not implemented for ExprStmt") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
 func (s *ExprStmt) Resolve() {}
 
 func (s *ExprStmt) String() string {
 	return fmt.Sprintf("(ExprStmt %s)", s.Expression.String())
 }
+
+// ========== For Statement ==========
 
 // ForStmt represents a for statement node in the AST
 type ForStmt struct {
@@ -141,6 +191,12 @@ type ForStmt struct {
 }
 
 func (s *ForStmt) stmtNode() {}
+
+// GenerateCode will generate C code for the AST node
+func (s *ForStmt) GenerateCode() {}
+
+// Pos returns the start position of the expression in the source
+func (s *ForStmt) Pos() source.Pos { panic("Pos() not implemented for ForStmt") }
 
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
 func (s *ForStmt) Resolve() {}
@@ -165,6 +221,8 @@ func (s *ForStmt) String() string {
 	return str.String()
 }
 
+// ========== If Statement ==========
+
 // IfStmt represents an if statement node in the AST
 type IfStmt struct {
 	Expression Expr
@@ -173,6 +231,12 @@ type IfStmt struct {
 }
 
 func (s *IfStmt) stmtNode() {}
+
+// GenerateCode will generate C code for the AST node
+func (s *IfStmt) GenerateCode() {}
+
+// Pos returns the start position of the expression in the source
+func (s *IfStmt) Pos() source.Pos { panic("Pos() not implemented for IfStmt") }
 
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
 func (s *IfStmt) Resolve() {}
@@ -192,6 +256,8 @@ func (s *IfStmt) String() string {
 	return str.String()
 }
 
+// ========== Return Statement ==========
+
 // ReturnStmt represents a return statement node in the AST
 type ReturnStmt struct {
 	Expressions []Expr
@@ -199,12 +265,20 @@ type ReturnStmt struct {
 
 func (s *ReturnStmt) stmtNode() {}
 
+// GenerateCode will generate C code for the AST node
+func (s *ReturnStmt) GenerateCode() {}
+
+// Pos returns the start position of the expression in the source
+func (s *ReturnStmt) Pos() source.Pos { panic("Pos() not implemented for ReturnStmt") }
+
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
 func (s *ReturnStmt) Resolve() {}
 
 func (s *ReturnStmt) String() string {
 	return "(ReturnStmt " + expressionListAsString(s.Expressions) + ")"
 }
+
+// ========== Switch Statement ==========
 
 // CaseClause represents a case clause node in the AST
 type CaseClause struct {
@@ -241,6 +315,12 @@ type SwitchStmt struct {
 }
 
 func (s *SwitchStmt) stmtNode() {}
+
+// GenerateCode will generate C code for the AST node
+func (s *SwitchStmt) GenerateCode() {}
+
+// Pos returns the start position of the expression in the source
+func (s *SwitchStmt) Pos() source.Pos { panic("Pos() not implemented for SwitchStmt") }
 
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
 func (s *SwitchStmt) Resolve() {}
@@ -281,6 +361,8 @@ func (s *SwitchStmt) String() string {
 	return str.String()
 }
 
+// ========== While Statement =========
+
 // WhileStmt represents a while statement node in the AST
 type WhileStmt struct {
 	Expression Expr
@@ -288,6 +370,12 @@ type WhileStmt struct {
 }
 
 func (s *WhileStmt) stmtNode() {}
+
+// GenerateCode will generate C code for the AST node
+func (s *WhileStmt) GenerateCode() {}
+
+// Pos returns the start position of the expression in the source
+func (s *WhileStmt) Pos() source.Pos { panic("Pos() not implemented for WhileStmt") }
 
 // Resolve will infer types for any unspecified identifiers and constants and perform type checking
 func (s *WhileStmt) Resolve() {}

@@ -9,11 +9,14 @@
 package ast
 
 import (
+	"phobos/source"
 	"strings"
 )
 
 // Node represents a node in the AST
 type Node interface {
+	GenerateCode()
+	Pos() source.Pos
 	Resolve()
 	String() string
 }
