@@ -9,8 +9,8 @@ DBGCFLAGS = -g -O0 -DDEBUG
 LFLAGS = 
 
 # Object files
-OBJECTS = $(OBJDIR)/intern.o $(OBJDIR)/pc.o
-TSTOBJS = $(OBJDIR)/intern_test.o $(OBJDIR)/testpc.o
+OBJECTS = $(OBJDIR)/intern.o $(OBJDIR)/source.o $(OBJDIR)/pc.o
+TSTOBJS = $(OBJDIR)/intern_test.o $(OBJDIR)/source_test.o $(OBJDIR)/token_test.o $(OBJDIR)/scanner_test.o $(OBJDIR)/testpc.o
 
 # Default build
 all: pc testpc
@@ -24,6 +24,15 @@ testpc: $(TSTOBJS)
 $(OBJDIR)/intern.o: $(SRCDIR)/intern.c $(SRCDIR)/intern.h
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
+$(OBJDIR)/source.o: $(SRCDIR)/source.c $(SRCDIR)/source.h
+	$(CC) -c $(DBGCFLAGS) -o $@ $<
+
+$(OBJDIR)/token.o: $(SRCDIR)/token.c $(SRCDIR)/token.h
+	$(CC) -c $(DBGCFLAGS) -o $@ $<
+
+$(OBJDIR)/scanner.o: $(SRCDIR)/scanner.c $(SRCDIR)/intern.h $(SRCDIR)/scanner.h $(SRCDIR)/token.h
+	$(CC) -c $(DBGCFLAGS) -o $@ $<
+
 $(OBJDIR)/pc.o: $(SRCDIR)/pc.c
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
@@ -31,7 +40,16 @@ $(OBJDIR)/pc.o: $(SRCDIR)/pc.c
 $(OBJDIR)/intern_test.o: $(TSTSRCDIR)/intern_test.c $(SRCDIR)/intern.c $(SRCDIR)/intern.h $(TSTSRCDIR)/testing.h
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
-$(OBJDIR)/testpc.o: $(TSTSRCDIR)/testpc.c
+$(OBJDIR)/source_test.o: $(TSTSRCDIR)/source_test.c $(SRCDIR)/source.c $(SRCDIR)/source.h $(TSTSRCDIR)/testing.h
+	$(CC) -c $(DBGCFLAGS) -o $@ $<
+
+$(OBJDIR)/token_test.o: $(TSTSRCDIR)/token_test.c $(SRCDIR)/token.c $(SRCDIR)/token.h $(TSTSRCDIR)/testing.h
+	$(CC) -c $(DBGCFLAGS) -o $@ $<
+
+$(OBJDIR)/scanner_test.o: $(TSTSRCDIR)/scanner_test.c $(SRCDIR)/intern.h $(SRCDIR)/scanner.c $(SRCDIR)/token.h $(TSTSRCDIR)/testing.h
+	$(CC) -c $(DBGCFLAGS) -o $@ $<
+
+$(OBJDIR)/testpc.o: $(TSTSRCDIR)/testpc.c $(TSTSRCDIR)/intern_test.h $(TSTSRCDIR)/source_test.h $(TSTSRCDIR)/token_test.h $(TSTSRCDIR)/scanner_test.h 
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
 clean:

@@ -5,6 +5,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include "intern_test.h"
+#include "source_test.h"
+#include "scanner_test.h"
 
 int num_tests;
 int num_failed_tests;
@@ -50,5 +52,7 @@ void test_passed(const char *test) {
 int main(int argc, char **argv) {
     testing_start("Phobos Compiler");
     intern_test();
+    source_test();
+    scanner_test();
     testing_complete();
 }
