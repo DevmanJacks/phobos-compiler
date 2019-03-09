@@ -6,6 +6,7 @@ typedef enum token_t {
     TOKEN_EOF = 0,
     TOKEN_IDENT,
     TOKEN_INT,
+    TOKEN_FLOAT,
 
     TOKEN_VAR
 } token_t;

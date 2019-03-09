@@ -10,7 +10,7 @@ LFLAGS =
 
 # Object files
 OBJECTS = $(OBJDIR)/intern.o $(OBJDIR)/source.o $(OBJDIR)/pc.o
-TSTOBJS = $(OBJDIR)/intern_test.o $(OBJDIR)/source_test.o $(OBJDIR)/token_test.o $(OBJDIR)/scanner_test.o $(OBJDIR)/testpc.o
+TSTOBJS = $(OBJDIR)/error.o $(OBJDIR)/intern_test.o $(OBJDIR)/source_test.o $(OBJDIR)/token_test.o $(OBJDIR)/scanner_test.o $(OBJDIR)/testpc.o
 
 # Default build
 all: pc testpc
@@ -30,6 +30,9 @@ $(OBJDIR)/source.o: $(SRCDIR)/source.c $(SRCDIR)/source.h
 $(OBJDIR)/token.o: $(SRCDIR)/token.c $(SRCDIR)/token.h
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
+$(OBJDIR)/error.o: $(SRCDIR)/error.c $(SRCDIR)/error.h
+	$(CC) -c $(DBGCFLAGS) -o $@ $<
+
 $(OBJDIR)/scanner.o: $(SRCDIR)/scanner.c $(SRCDIR)/intern.h $(SRCDIR)/scanner.h $(SRCDIR)/token.h
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
@@ -46,7 +49,7 @@ $(OBJDIR)/source_test.o: $(TSTSRCDIR)/source_test.c $(SRCDIR)/source.c $(SRCDIR)
 $(OBJDIR)/token_test.o: $(TSTSRCDIR)/token_test.c $(SRCDIR)/token.c $(SRCDIR)/token.h $(TSTSRCDIR)/testing.h
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
-$(OBJDIR)/scanner_test.o: $(TSTSRCDIR)/scanner_test.c $(SRCDIR)/intern.h $(SRCDIR)/scanner.c $(SRCDIR)/token.h $(TSTSRCDIR)/testing.h
+$(OBJDIR)/scanner_test.o: $(TSTSRCDIR)/scanner_test.c  $(SRCDIR)/scanner.c  $(SRCDIR)/error.h $(SRCDIR)/intern.h  $(SRCDIR)/scanner.h $(SRCDIR)/token.h $(TSTSRCDIR)/testing.h
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
 $(OBJDIR)/testpc.o: $(TSTSRCDIR)/testpc.c $(TSTSRCDIR)/intern_test.h $(TSTSRCDIR)/source_test.h $(TSTSRCDIR)/token_test.h $(TSTSRCDIR)/scanner_test.h 

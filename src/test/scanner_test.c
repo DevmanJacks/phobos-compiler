@@ -15,7 +15,19 @@ static element_t test[] = {
     { "hello", TOKEN_IDENT },
     { "_", TOKEN_IDENT },
     { "_123", TOKEN_IDENT },
-    { "test_var_1", TOKEN_IDENT }
+    { "test_var_1", TOKEN_IDENT },
+
+    // Basic type literals
+    { "0", TOKEN_INT },
+    { "1", TOKEN_INT },
+    { "12_345_678_901_234_567_890", TOKEN_INT },
+    { "01234567", TOKEN_INT },
+    { "0123_456", TOKEN_INT },
+    { "0x01234567", TOKEN_INT },
+    { "0X89ab_cdef", TOKEN_INT },
+    { "0b0", TOKEN_INT },
+    { "0B1", TOKEN_INT },
+    { "0b1111_0000_1111_0000", TOKEN_INT }
 };
 
 static void test_scan()
@@ -31,7 +43,7 @@ static void test_scan()
         token_t token = scan(s);
 
         if (token == test[i].token) {
-            if (token == TOKEN_IDENT) {// || token == TOKEN_INT || token == TOKEN_FLOAT || token == TOKEN_CHAR || token == TOKEN_STR || isKeyword(token)) {
+            if (token == TOKEN_IDENT || token == TOKEN_INT) {// token == TOKEN_FLOAT || token == TOKEN_CHAR || token == TOKEN_STR || isKeyword(token)) {
                 if (strcmp(s->lexeme, test[i].lexeme) == 0) {
                     test_passed(buffer);
                 } else {
