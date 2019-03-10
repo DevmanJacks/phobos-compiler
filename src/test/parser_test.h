@@ -1,4 +1,4 @@
 #pragma once
 
 // Public functions
-extern void scanner_test();
+extern void parser_test(void);

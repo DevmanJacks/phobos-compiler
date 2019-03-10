@@ -1,7 +1,4 @@
-#ifndef __SOURCE_TEST_H
-#define __SOURCE_TEST_H
+#pragma once
 
 // Public funtions
-void source_test();
-
-#endif
+void source_test(void);

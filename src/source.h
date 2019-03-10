@@ -2,6 +2,7 @@
 #define __SOURCE_H
 
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef struct source_t {
     char    *filename;

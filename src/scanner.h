@@ -1,11 +1,10 @@
-#ifndef __SCANNER_H
-#define __SCANNER_H
+#pragma once
 
 #include <stddef.h>
 #include "source.h"
 #include "token.h"
 
-typedef struct scanner_t {
+typedef struct scanner {
     source_t *source;
 
     // Current state
@@ -16,10 +15,10 @@ typedef struct scanner_t {
     // Token information
     token_t    token;
     pos_t      token_start_pos;
+    pos_t      token_end_pos;
     const char *lexeme;
 } scanner_t;
 
 // Public functions
+extern scanner_t *make_scanner(source_t *source);
 extern token_t scan(scanner_t *scanner);
-
-#endif

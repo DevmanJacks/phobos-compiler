@@ -7,6 +7,7 @@
 #include "intern_test.h"
 #include "source_test.h"
 #include "scanner_test.h"
+#include "parser_test.h"
 
 int num_tests;
 int num_failed_tests;
@@ -54,5 +55,6 @@ int main(int argc, char **argv) {
     intern_test();
     source_test();
     scanner_test();
+    parser_test();
     testing_complete();
 }

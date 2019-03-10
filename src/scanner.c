@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "error.h"
 #include "intern.h"
 #include "scanner.h"
@@ -52,14 +53,70 @@ static void next_char(scanner_t *scanner) {
 	}
 }
 
-void scan_ident(scanner_t *scanner) {
+// Return the next byte (we don't need to check for unicode) of the src without advancing the scanner.  If we are at end of file returns 0
+static uint8_t peek(scanner_t *scanner)
+{
+	if (scanner->offset < scanner->source->length) {
+		return *(scanner->source->code + scanner->next_offset);
+	}
+
+	return 0;
+}
+
+static bool scan_escape(scanner_t *scanner)
+{
+	next_char(scanner);
+
+	// TODO: Ensure escape sequence is valid
+	return true;
+}
+
+static void scan_character(scanner_t *scanner)
+{
+	size_t start = scanner->offset;
+	next_char(scanner);					// Skip past opening quote
+	
+	unsigned int num = 0;
+	bool valid = true;					// Assume that the character literal is valid.  We will set to false if not.
+
+	while (true) {
+		if (scanner->curr_char == '\'') {
+			next_char(scanner);
+			
+			if (valid && num != 1) {
+				log_error(current_pos(scanner), current_pos(scanner), "Invalid character literal.");
+			}
+
+			break;
+		}
+
+		if (scanner->curr_char == '\n' || scanner->curr_char < 0) {
+			log_error(current_pos(scanner), current_pos(scanner), "Character literal not terminated.");
+			break;
+		}
+
+		num++;
+
+		if (scanner->curr_char == '\\') {
+			next_char(scanner);
+			valid = valid && scan_escape(scanner);
+		}
+
+		next_char(scanner);
+	}
+
+	scanner->token = TOKEN_CHAR;
+	scanner->lexeme = intern_string((const char *)(scanner->source->code + start), scanner->offset - start);
+}
+
+static void scan_ident(scanner_t *scanner) {
     size_t start = scanner->offset;
 
     while (is_letter(scanner->curr_char) || is_digit(scanner->curr_char) || scanner->curr_char == '_') {
         next_char(scanner);
     }
 
-    scanner->lexeme = intern_string((const char *)(scanner->source->code), scanner->offset - start);
+    scanner->lexeme = intern_string((const char *)(scanner->source->code + start), scanner->offset - start);
     scanner->token = lookup_token(scanner->lexeme);
 }
 
@@ -98,7 +155,7 @@ static void scan_integer(scanner_t *s, base_t base) {
 	}
 }
 
-void scan_number(scanner_t *scanner) {
+static void scan_number(scanner_t *scanner) {
 	size_t start = scanner->offset;
 	scanner->token = TOKEN_INT;
 
@@ -111,7 +168,7 @@ void scan_number(scanner_t *scanner) {
 
 			if (is_binary_digit(scanner->curr_char)) {
 				scan_integer(scanner, BASE_BINARY);
-				scanner->lexeme = intern_string((const char *)(scanner->source->code), scanner->offset - start);
+				scanner->lexeme = intern_string((const char *)(scanner->source->code + start), scanner->offset - start);
 			} else {
 				log_error(current_pos(scanner), current_pos(scanner), "Expected binary digit following %c.", base);
 			}
@@ -120,14 +177,14 @@ void scan_number(scanner_t *scanner) {
 		} else if (is_octal_digit(scanner->curr_char)) {
 			next_char(scanner);
 			scan_integer(scanner, BASE_OCTAL);
-			scanner->lexeme = intern_string((const char *)(scanner->source->code), scanner->offset - start);
+			scanner->lexeme = intern_string((const char *)(scanner->source->code + start), scanner->offset - start);
 			return;
 		} else if (base== 'x' || base == 'X') {
 			next_char(scanner);
 
 			if (is_hex_digit(scanner->curr_char)) {
 				scan_integer(scanner, BASE_HEX);
-				scanner->lexeme = intern_string((const char *)(scanner->source->code), scanner->offset - start);
+				scanner->lexeme = intern_string((const char *)(scanner->source->code + start), scanner->offset - start);
 			} else {
 				log_error(current_pos(scanner), current_pos(scanner), "Expected hex digit following %c.", base);
 			}
@@ -159,10 +216,123 @@ void scan_number(scanner_t *scanner) {
 		}
 	}
 
-	scanner->lexeme = intern_string((const char *)(scanner->source->code), scanner->offset - start);
+	scanner->lexeme = intern_string((const char *)(scanner->source->code + start), scanner->offset - start);
 }
 
+static void scan_string(scanner_t *scanner)
+{
+	size_t start = scanner->offset;
+	next_char(scanner);					// Skip past opening quote
+
+	bool valid = true;					// Assume that the character literal is valid.  We will set to false if not.
+
+	while (true) {
+		if (scanner->curr_char == '\"') {
+			next_char(scanner);
+			break;
+		}
+			
+		if (scanner->curr_char == '\n' || scanner->curr_char < 0) {
+			log_error(current_pos(scanner), current_pos(scanner), "String literal not terminated.");
+			break;
+		}
+
+		if (scanner->curr_char == '\\') {
+			valid = valid && scan_escape(scanner);
+		}
+
+		next_char(scanner);
+	}
+
+	scanner->token = TOKEN_STR;
+	scanner->lexeme = intern_string((const char *)(scanner->source->code + start), scanner->offset - start);
+}
+
+#define CASE1(c, t) \
+	case c: \
+		next_char(scanner); \
+		scanner->token = t; \
+		break;
+
+#define CASE2(c, t, c2, t2)	\
+	case c: \
+		next_char(scanner); \
+		if (scanner->curr_char == c2) { \
+			scanner->token = t2; \
+			next_char(scanner); \
+		} else { \
+			scanner->token = t; \
+		} \
+		break;
+
+#define CASE3(c, t, c2, t2, c3, t3) \
+	case c: \
+		next_char(scanner); \
+		if (scanner->curr_char == c2) { \
+			scanner->token = t2; \
+			next_char(scanner); \
+		} else if (scanner->curr_char == c3) { \
+			scanner->token = t3; \
+			next_char(scanner); \
+		} else { \
+			scanner->token = t; \
+		} \
+		break;
+
+#define CASE4(c, t, c2, t2) \
+	case c: \
+		if (is_digit(peek(scanner))) { \
+			scan_number(scanner); \
+		} else { \
+			next_char(scanner); \
+			if (scanner->curr_char == c2) { \
+				next_char(scanner); \
+				scanner->token = t2; \
+			} else { \
+				scanner->token = t; \
+			} \
+		} \
+		break;
+
+#define CASE5(c, t, c2, t2, c3, t3) \
+	case c: \
+		if (is_digit(peek(scanner))) { \
+			scan_number(scanner); \
+		} else { \
+			next_char(scanner); \
+			if (scanner->curr_char == c2) { \
+				next_char(scanner); \
+				scanner->token = t2; \
+			} else if (scanner->curr_char == c3) { \
+				next_char(scanner); \
+				scanner->token = t3; \
+			} else { \
+				scanner->token = t; \
+			} \
+		} \
+		break;
+
+#define CASE6(c, t, t2, t3, t4) \
+	case c: \
+		next_char(scanner); \
+		if (scanner->curr_char == '=') { \
+			scanner->token = t2; \
+			next_char(scanner); \
+		} else if (scanner->curr_char == c) { \
+			next_char(scanner); \
+			if (scanner->curr_char == '=') { \
+				scanner->token = t4; \
+				next_char(scanner); \
+			} else { \
+				scanner->token = t3; \
+			} \
+		} else { \
+			scanner->token = t; \
+		} \
+		break;
+
 token_t scan(scanner_t *scanner) {
+top:
     scanner->token_start_pos = scanner->offset;
 
     switch (scanner->curr_char) {
@@ -180,15 +350,83 @@ token_t scan(scanner_t *scanner) {
 			scan_number(scanner);
 			break;
 
+		case '\'':
+			scan_character(scanner);
+			break;
+
+		case '\"':
+			scan_string(scanner);
+			break;
+
+		case '/':
+			next_char(scanner);
+
+			if (scanner->curr_char == '/') {
+				// Line comment
+				next_char(scanner);
+
+				while (scanner->curr_char != '\n' && scanner->curr_char != -1)
+					next_char(scanner);
+
+				goto top;
+			} else if (scanner->curr_char == '=') {
+				scanner->token = TOKEN_DIV_ASSIGN;
+				next_char(scanner);
+			} else {
+				scanner->token = TOKEN_DIV;
+			}
+
+			break;
+		
+		case -1:
+			scanner->token = TOKEN_EOF;
+			break;
+
+		CASE1('(', TOKEN_LPAREN)
+		CASE1(')', TOKEN_RPAREN)
+		CASE1('{', TOKEN_LBRACE)
+		CASE1('}', TOKEN_RBRACE)
+		CASE1('[', TOKEN_LBRACKET)
+		CASE1(']', TOKEN_RBRACKET)
+		CASE1(',', TOKEN_COMMA)
+		CASE1(';', TOKEN_SEMICOLON)
+		CASE1('?', TOKEN_QUESTION)
+
+		CASE2(':', TOKEN_COLON, '=', TOKEN_COLON_ASSIGN)
+		CASE2('!', TOKEN_NOT, '=', TOKEN_NOT_EQ)
+		CASE2('~', TOKEN_BITWISE_NOT, '=', TOKEN_BITWISE_NOT_ASSIGN)
+		CASE2('*', TOKEN_MUL, '=', TOKEN_MUL_ASSIGN)
+		CASE2('%', TOKEN_MOD, '=', TOKEN_MOD_ASSIGN)
+		CASE2('^', TOKEN_XOR, '=', TOKEN_XOR_ASSIGN)
+		CASE2('=', TOKEN_ASSIGN, '=', TOKEN_EQ)
+
+		CASE3('&', TOKEN_BITWISE_AND, '=', TOKEN_BITWISE_AND_ASSIGN, '&', TOKEN_AND)
+		CASE3('|', TOKEN_BITWISE_OR, '=', TOKEN_BITWISE_OR_ASSIGN, '|', TOKEN_OR)
+
+		CASE4('.', TOKEN_DOT, '.', TOKEN_DOTDOT)
+		CASE4('+', TOKEN_ADD, '=', TOKEN_ADD_ASSIGN)
+
+		CASE5('-', TOKEN_SUB, '=', TOKEN_SUB_ASSIGN, '>', TOKEN_RETURNS)
+
+		CASE6('<', TOKEN_LT, TOKEN_LE, TOKEN_LSHIFT, TOKEN_LSHIFT_ASSIGN)
+		CASE6('>', TOKEN_GT, TOKEN_GE, TOKEN_RSHIFT, TOKEN_RSHIFT_ASSIGN)
+
         default:
             break;
     }
 
+	scanner->token_end_pos = scanner->offset;
 	return scanner->token;
 }
 
-scanner_t *make_scanner(source_t *source)
-{
+#undef CASE1
+#undef CASE2
+#undef CASE3
+#undef CASE4
+#undef CASE5
+#undef CASE6
+
+scanner_t *make_scanner(source_t *source) {
 	scanner_t *s = malloc(sizeof(scanner_t));
 
 	if (s) {

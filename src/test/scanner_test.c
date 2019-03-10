@@ -27,11 +27,102 @@ static element_t test[] = {
     { "0X89ab_cdef", TOKEN_INT },
     { "0b0", TOKEN_INT },
     { "0B1", TOKEN_INT },
-    { "0b1111_0000_1111_0000", TOKEN_INT }
+    { "0b1111_0000_1111_0000", TOKEN_INT },
+    { "3.14159265", TOKEN_FLOAT },
+    { "0.", TOKEN_FLOAT },
+    { ".0", TOKEN_FLOAT },
+    { "1e2", TOKEN_FLOAT },
+    { "10E+10", TOKEN_FLOAT },
+    { "17e-2", TOKEN_FLOAT },
+    { "1.41421356237e10", TOKEN_FLOAT },
+    { "'a'", TOKEN_CHAR },
+    { "\"This is a sttring literal\"", TOKEN_STR },
+
+    // Operators
+    { "(", TOKEN_LPAREN },
+	{ ")", TOKEN_RPAREN },
+	{ "{", TOKEN_LBRACE },
+	{ "}", TOKEN_RBRACE },
+	{ "[", TOKEN_LBRACKET },
+	{ "]", TOKEN_RBRACKET },
+
+	{ ",", TOKEN_COMMA },
+	{ ".", TOKEN_DOT },
+	{ "..", TOKEN_DOTDOT },
+	{ ";", TOKEN_SEMICOLON },
+	{ ":", TOKEN_COLON },
+	{ "?", TOKEN_QUESTION },
+
+	{ "!", TOKEN_NOT },
+	{ "~", TOKEN_BITWISE_NOT },
+	{ "->", TOKEN_RETURNS },
+
+	{ "*", TOKEN_MUL },
+	{ "/", TOKEN_DIV },
+	{ "%", TOKEN_MOD },
+	{ "<<", TOKEN_LSHIFT },
+	{ ">>", TOKEN_RSHIFT },
+	{ "&", TOKEN_BITWISE_AND },
+
+	{ "+", TOKEN_ADD },
+	{ "-", TOKEN_SUB },
+	{ "|", TOKEN_BITWISE_OR },
+	{ "^", TOKEN_XOR },
+
+	{ "==", TOKEN_EQ },
+	{ "!=", TOKEN_NOT_EQ },
+	{ "<", TOKEN_LT },
+	{ "<=", TOKEN_LE },
+	{ ">", TOKEN_GT },
+	{ ">=", TOKEN_GE },
+
+	{ "&&", TOKEN_AND },
+	{ "||", TOKEN_OR },
+
+	{ "=", TOKEN_ASSIGN },
+	{ ":=", TOKEN_COLON_ASSIGN },
+	{ "+=", TOKEN_ADD_ASSIGN },
+	{ "-=", TOKEN_SUB_ASSIGN },
+	{ "*=", TOKEN_MUL_ASSIGN },
+	{ "/=", TOKEN_DIV_ASSIGN },
+	{ "%=", TOKEN_MOD_ASSIGN },
+	{ "<<=", TOKEN_LSHIFT_ASSIGN },
+	{ ">>=", TOKEN_RSHIFT_ASSIGN },
+	{ "&=", TOKEN_BITWISE_AND_ASSIGN },
+    { "|=", TOKEN_BITWISE_OR_ASSIGN },
+	{ "~=", TOKEN_BITWISE_NOT_ASSIGN },
+    { "^=", TOKEN_XOR_ASSIGN },
+
+    // Keywords
+    { "break", TOKEN_BREAK },
+    { "case", TOKEN_CASE },
+    { "const", TOKEN_CONST },
+	{ "continue", TOKEN_CONTINUE },
+	{ "default", TOKEN_DEFAULT },
+	{ "defer", TOKEN_DEFER },
+	{ "else", TOKEN_ELSE },
+	{ "enum", TOKEN_ENUM },
+	{ "false", TOKEN_FALSE },
+	{ "for", TOKEN_FOR },
+	{ "func", TOKEN_FUNC },
+	{ "if", TOKEN_IF },
+	{ "import", TOKEN_IMPORT },
+	{ "in", TOKEN_IN },
+	{ "interface", TOKEN_INTERFACE },
+	{ "new", TOKEN_NEW },
+	{ "return", TOKEN_RETURN },
+	{ "struct", TOKEN_STRUCT },
+	{ "switch", TOKEN_SWITCH },
+	{ "true", TOKEN_TRUE },
+	{ "type", TOKEN_TYPE },
+	{ "var", TOKEN_VAR },
+    { "while", TOKEN_WHILE },
+
+	// Comments
+	{ "//", TOKEN_EOF }
 };
 
-static void test_scan()
-{
+static void test_scan(void) {
     char buffer[128];
     int count = sizeof(test) / sizeof(element_t);
 
@@ -59,7 +150,8 @@ static void test_scan()
 		free(source);
     }
 }
-void scanner_test() {
+
+void scanner_test(void) {
     test_section("Scanner");
     test_scan();
 }

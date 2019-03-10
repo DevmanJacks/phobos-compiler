@@ -1,5 +1,7 @@
-#ifndef __TOKEN_H
-#define __TOKEN_H
+#pragma once
+
+#include <stdbool.h>
+#include "token.h"
 
 typedef enum token_t {
     TOKEN_ILLEGAL = -1,
@@ -7,11 +9,112 @@ typedef enum token_t {
     TOKEN_IDENT,
     TOKEN_INT,
     TOKEN_FLOAT,
+    TOKEN_CHAR,
+    TOKEN_STR,
 
-    TOKEN_VAR
+    TOKEN_LPAREN,
+	TOKEN_RPAREN,
+	TOKEN_LBRACE,
+	TOKEN_RBRACE,
+	TOKEN_LBRACKET,
+	TOKEN_RBRACKET,
+
+	TOKEN_COMMA,
+	TOKEN_DOT,
+	TOKEN_DOTDOT,
+	TOKEN_SEMICOLON,
+	TOKEN_COLON,
+	TOKEN_QUESTION,
+
+	TOKEN_NOT,
+	TOKEN_BITWISE_NOT,
+	TOKEN_RETURNS,
+
+	// Multiplication precedence
+	TOKEN_BINARY_OP_START,
+	TOKEN_MUL_START = TOKEN_BINARY_OP_START,
+	TOKEN_MUL = TOKEN_MUL_START,
+	TOKEN_DIV,
+	TOKEN_MOD,
+	TOKEN_LSHIFT,
+	TOKEN_RSHIFT,
+	TOKEN_BITWISE_AND,
+	TOKEN_MUL_END = TOKEN_BITWISE_AND,
+
+	// Addition precedence
+	TOKEN_ADD_START,
+	TOKEN_ADD = TOKEN_ADD_START,
+	TOKEN_SUB,
+	TOKEN_BITWISE_OR,
+	TOKEN_XOR,
+	TOKEN_ADD_END = TOKEN_XOR,
+
+	// Comparative precedence
+	TOKEN_CMP_START,
+	TOKEN_EQ = TOKEN_CMP_START,
+	TOKEN_NOT_EQ,
+	TOKEN_LT,
+	TOKEN_LE,
+	TOKEN_GT,
+	TOKEN_GE,
+	TOKEN_CMP_END = TOKEN_GE,
+
+	TOKEN_AND,
+	TOKEN_OR,
+	TOKEN_BINARY_OP_END = TOKEN_OR,
+
+	// Assignment operators
+	TOKEN_ASSIGN_OP_START,
+	TOKEN_ASSIGN = TOKEN_ASSIGN_OP_START,
+	TOKEN_COLON_ASSIGN,
+	TOKEN_ADD_ASSIGN,
+	TOKEN_SUB_ASSIGN,
+	TOKEN_MUL_ASSIGN,
+	TOKEN_DIV_ASSIGN,
+	TOKEN_MOD_ASSIGN,
+	TOKEN_LSHIFT_ASSIGN,
+	TOKEN_RSHIFT_ASSIGN,
+	TOKEN_BITWISE_AND_ASSIGN,
+    TOKEN_BITWISE_OR_ASSIGN,
+	TOKEN_BITWISE_NOT_ASSIGN,
+    TOKEN_XOR_ASSIGN,
+	TOKEN_ASSIGN_OP_END = TOKEN_XOR_ASSIGN,
+
+    // Keywords
+    TOKEN_KEYWORD_START,
+    TOKEN_BREAK = TOKEN_KEYWORD_START,
+	TOKEN_CASE,
+	TOKEN_CONST,
+	TOKEN_CONTINUE,
+	TOKEN_DEFAULT,
+	TOKEN_DEFER,
+	TOKEN_ELSE,
+	TOKEN_ENUM,
+	TOKEN_FALSE,
+	TOKEN_FOR,
+	TOKEN_FUNC,
+	TOKEN_IF,
+	TOKEN_IMPORT,
+	TOKEN_IN,
+	TOKEN_INTERFACE,
+	TOKEN_NEW,
+	TOKEN_RETURN,
+	TOKEN_STRUCT,
+	TOKEN_SWITCH,
+	TOKEN_TRUE,
+	TOKEN_TYPE,
+	TOKEN_VAR,
+    TOKEN_WHILE,
+    TOKEN_KEYWORD_END = TOKEN_WHILE,
+    NUM_TOKENS
 } token_t;
+
+static inline bool is_assign_op(token_t token) { return TOKEN_ASSIGN_OP_START <= token && token <= TOKEN_ASSIGN_OP_END; }
+static inline bool is_binary_op(token_t token) { return TOKEN_BINARY_OP_START <= token && token <= TOKEN_BINARY_OP_END; }
+static inline bool is_keyword(token_t token) {	return TOKEN_KEYWORD_START <= token && token <= TOKEN_KEYWORD_END; }
 
 // Public functions
 extern token_t lookup_token(const char *ident);
+extern const char *token_string(token_t token);
 
-#endif
+extern unsigned int operator_precedence(token_t token);
