@@ -52,8 +52,14 @@ static void test_parse_ident(void) {
     test_parse(ident, "pi", "(ident pi)")
 }
 
+static void test_parse_type()
+{
+    test_parse(type, "Int", "(type (ident Int))")
+}
+
 void parser_test(void) {
     test_section("Parser");
     test_parse_ident();
     test_parse_expr();
+    test_parse_type();
 }
