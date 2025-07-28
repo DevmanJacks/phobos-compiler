@@ -4,7 +4,7 @@
         {
             "label": "Build Compiler",
             "type": "shell",
-            "command": "gcc pc.c -o pc",
+            "command": "gcc -g pc.c -o pc",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
