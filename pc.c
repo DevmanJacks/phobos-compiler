@@ -10,20 +10,19 @@
 
 #include "error.c"
 #include "intern.c"
+#include "token.c"
 #include "scanner.c"
 
 void main(int argc, char **argv) {
     string_intern_initialise();
-
-    // Intern all of the keywords
-    char *keywords[] = { "else", "if" };
-
-    for (int i = 0; i < 2; i++)
-        intern_string(keywords[i]);
-
-    scanner *s = create_scanner("This is a test.");
+    token_initialise();
+    
+    //Scanner *s = create_scanner("const defer else enum func for if import interface struct var while");
+    //Scanner *s = create_scanner("if a > 3 b = true else b = false");
+    Scanner *s = create_scanner("a += 1");
 
     while (next_token(s)->kind != TOKEN_EOF) {
-        printf("%d,%d %d\n", s->current_token->start_pos, s->current_token->len, s->current_token->lexeme);
+        print_token(stdout, s->current_token, s->src);
+        printf("\n");
     }
 }

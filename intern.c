@@ -23,6 +23,10 @@ typedef struct string_table {
 string_buffer *interned_strings;
 string_table *interned_string_table;
 
+char *interned_string_value(interned_string s) {
+    return interned_strings->strings + s;
+}
+
 static uint32_t hash_string(const char *str)
 {
     uint32_t hash = 5381;
@@ -32,32 +36,6 @@ static uint32_t hash_string(const char *str)
         hash = ((hash << 5) + hash) + c;            // hash * 33 + c
 
     return hash;
-}
-
-void string_intern_initialise() {
-    interned_strings = malloc(sizeof(string_buffer) + STRING_BUFFER_INITIAL_SIZE);
-
-    if (interned_strings == NULL)
-    {
-        perror("Unable to allocate memory for interned_strings.");
-        exit(EOUT_OF_MEMORY);
-    }
-
-    interned_strings->capacity = STRING_BUFFER_INITIAL_SIZE;
-    interned_strings->length = 0;
-
-    interned_string_table = malloc(sizeof(string_table) + STRING_TABLE_NUM_INITIAL_ENTRIES * sizeof(interned_string));
-
-    if (interned_string_table == NULL)
-    {
-        perror("Unable to allocate memory for interned_string_table.");
-        exit(EOUT_OF_MEMORY);
-    }
-
-    interned_string_table->capacity = STRING_TABLE_NUM_INITIAL_ENTRIES;
-    interned_string_table->length = 0;
-
-    memset(interned_string_table->interned_strings, 0xFF, STRING_TABLE_NUM_INITIAL_ENTRIES * sizeof(interned_string));
 }
 
 interned_string intern_string(const char *str) {
@@ -92,4 +70,30 @@ interned_string intern_string(const char *str) {
     *(interned_strings->strings + interned_strings->length - 1) = 0;
 
     return interned_string_table->interned_strings[string_table_slot];
+}
+
+void string_intern_initialise() {
+    interned_strings = malloc(sizeof(string_buffer) + STRING_BUFFER_INITIAL_SIZE);
+
+    if (interned_strings == NULL)
+    {
+        perror("Unable to allocate memory for interned_strings.");
+        exit(EOUT_OF_MEMORY);
+    }
+
+    interned_strings->capacity = STRING_BUFFER_INITIAL_SIZE;
+    interned_strings->length = 0;
+
+    interned_string_table = malloc(sizeof(string_table) + STRING_TABLE_NUM_INITIAL_ENTRIES * sizeof(interned_string));
+
+    if (interned_string_table == NULL)
+    {
+        perror("Unable to allocate memory for interned_string_table.");
+        exit(EOUT_OF_MEMORY);
+    }
+
+    interned_string_table->capacity = STRING_TABLE_NUM_INITIAL_ENTRIES;
+    interned_string_table->length = 0;
+
+    memset(interned_string_table->interned_strings, 0xFF, STRING_TABLE_NUM_INITIAL_ENTRIES * sizeof(interned_string));
 }
