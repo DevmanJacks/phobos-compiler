@@ -15,7 +15,7 @@ typedef struct Scanner {
 Token *scan_ident(Scanner *s) {
     static char buffer[BUFFER_SIZE];
     int buffer_pos = 0;
-    char *start = s->src + s->pos;
+    int start = s->pos;
 
     while (isalnum(*(s->src + s->pos)) || *(s->src + s->pos) == '_') {
         buffer[buffer_pos++] = *(s->src + s->pos++);
@@ -32,14 +32,14 @@ Token *scan_ident(Scanner *s) {
 
 Token *scan_number(Scanner *s) {
     long value = 0;
-    char *start = s->src + s->pos;
+    int start = s->pos;
 
     while (isdigit(*(s->src + s->pos))) {
         char digit = *(s->src + s->pos++) - '0';
         value = value * 10 + digit;
     }
 
-    Token *t = create_token(TOKEN_INTEGER_LITERAL, start, s->pos - (start - s->src));
+    Token *t = create_token(TOKEN_INTEGER_LITERAL, start, s->pos - start);
     t->integer_literal = value;
     return t;
 }
@@ -50,13 +50,13 @@ void skip_whitespace(Scanner *s) {
 }
 
 Token *single_char(Scanner *s, TokenKind kind) {
-    s->current_token = create_token(kind, s->src + s->pos, 1);
+    s->current_token = create_token(kind, s->pos, 1);
     s->pos++;
     return s->current_token;
 }
 
 Token *single_or_double_char(Scanner *s, char next_char, TokenKind next_char_token_kind, TokenKind kind) {
-    char *start = s->src + s->pos++;
+    int start = s->pos++;
 
     if (*(s->src + s->pos) == next_char) {
         s->pos++;
@@ -75,7 +75,7 @@ Token *next_token(Scanner *s) {
         if (s->current_token->kind == TOKEN_EOF)
             return s->current_token;
 
-        return create_token(TOKEN_EOF, s->src + s->pos, 1);
+        return create_token(TOKEN_EOF, s->pos, 1);
     }
 
     char c = *(s->src + s->pos);
@@ -124,13 +124,13 @@ Token *next_token(Scanner *s) {
             return single_or_double_char(s, '=', TOKEN_ADD_ASSIGN, TOKEN_ADD);
 
         case '-':
-            return single_or_double_char(s, '=', TOKEN_SUBTRACT_ASSIGN, TOKEN_SUBTRACT);
+            return single_or_double_char(s, '=', TOKEN_SUB_ASSIGN, TOKEN_SUB);
 
         case '*':
-            return single_or_double_char(s, '=', TOKEN_MULTIPLY_ASSIGN, TOKEN_MULTIPLY);
+            return single_or_double_char(s, '=', TOKEN_MUL_ASSIGN, TOKEN_MUL);
 
         case '/':
-            return single_or_double_char(s, '=', TOKEN_DIVIDE_ASSIGN, TOKEN_DIVIDE);
+            return single_or_double_char(s, '=', TOKEN_DIV_ASSIGN, TOKEN_DIV);
     }
 
     fprintf(stderr, "Unexpected character \'%c\' in source file.", c);
@@ -150,6 +150,9 @@ Scanner *create_scanner(char *src) {
     s->pos = 0;
 
     s->current_token = 0;
+
+    // Prime the scanner
+    next_token(s);
 
     return s;
 }
