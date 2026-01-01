@@ -2,6 +2,8 @@
  * Lexical analyser for the phobos programming language.
  */
 
+#include <ctype.h>
+#include <string.h>
 #include "error.h"
 #include "scanner.h"
 

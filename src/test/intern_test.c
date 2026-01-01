@@ -3,6 +3,7 @@
  */
 
 #include "../intern.c"
+#include "intern_test.h"
 #include "testing.h"
 
 void test_intern_string() {

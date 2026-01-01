@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include "intern_test.h"
+#include "scanner_test.h"
 #include "source_test.h"
 #include "token_test.h"
  
@@ -54,5 +55,6 @@ int main(int argc, char **argv) {
     intern_test();
     source_test();
     token_test();
+    scanner_test();
     testing_complete();
 }

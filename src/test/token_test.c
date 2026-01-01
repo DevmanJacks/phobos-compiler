@@ -3,24 +3,23 @@
  */
 
 #include "../token.c"
+#include "token_test.h"
 #include "testing.h"
 
-static void test_token_initialise() {
-    token_initialise();
+static void test_operator_precedence() {
+    Token *add_token = create_token(TOKEN_ADD, 0, 1);
 
-    // Ensure all keywords are interned
+    if (operator_precedence(add_token) != 4) {
+        test_failed("operator_precedence()", "Precedence of + should be 4.");
+    } else {
+        test_passed("operator_precedence()");
+    }
+}
+
+static void test_token_initialise() {
+    // Intern the keywords
+    token_initialise();
     InternedString end_of_keywords = intern_string("** END OF KEYWORDS **");
-    intern_string("const");
-    intern_string("defer");
-    intern_string("else");
-    intern_string("enum");
-    intern_string("func");
-    intern_string("for");
-    intern_string("if");
-    intern_string("import");
-    intern_string("interface");
-    intern_string("struct");
-    intern_string("var");
 
     // All keywords should have an InternedString value less than end_of_keywords
     if (intern_string("const") > end_of_keywords)
@@ -43,6 +42,8 @@ static void test_token_initialise() {
         test_failed("token_initialise()", "Keyword 'interface' not interned.");
     else if (intern_string("struct") > end_of_keywords)
         test_failed("token_initialise()", "Keyword 'struct' not interned.");
+    else if (intern_string("var") > end_of_keywords)
+        test_failed("token_initialise()", "Keyword 'var' not interned.");
     else if (intern_string("while") > end_of_keywords)
         test_failed("token_initialise()", "Keyword 'while' not interned.");
     else
@@ -52,4 +53,5 @@ static void test_token_initialise() {
 extern void token_test() {
     test_section("Tokens");
     test_token_initialise();
+    test_operator_precedence();
 }

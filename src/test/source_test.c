@@ -3,6 +3,7 @@
  */
 
 #include "../source.c"
+#include "source_test.h"
 #include "testing.h"
 
 static void test_add_line() {
