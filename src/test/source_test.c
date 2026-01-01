@@ -24,7 +24,7 @@ static void test_add_line() {
     }
 }
 
-void test_create_source() {
+static void test_create_source() {
     char *filename = "test.p";
     uint8_t *code = (uint8_t *)"Hello World!";
     size_t length = 12;

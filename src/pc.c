@@ -3,10 +3,11 @@
  */
 
 #include "intern.h"
+#include "token.h"
 
 void main(int argc, char **argv) {
     string_intern_initialise();
-    // token_initialise();
+    token_initialise();
     
     // //Scanner *s = create_scanner("const defer else enum func for if import interface struct var while");
     // //Scanner *s = create_scanner("if a > 3 b = true else b = false");

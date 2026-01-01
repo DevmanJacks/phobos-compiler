@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "intern_test.h"
 #include "source_test.h"
+#include "token_test.h"
  
 int num_tests;
 int num_failed_tests;
@@ -52,5 +53,6 @@ int main(int argc, char **argv) {
     testing_start("Phobos Compiler");
     intern_test();
     source_test();
+    token_test();
     testing_complete();
 }

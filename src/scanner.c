@@ -2,17 +2,12 @@
  * Lexical analyser for the phobos programming language.
  */
 
-typedef struct Scanner {
-    char *src;
-    int len;
-    int pos;
-
-    Token *current_token;
-} Scanner;
+#include "error.h"
+#include "scanner.h"
 
 #define BUFFER_SIZE 128
 
-Token *scan_ident(Scanner *s) {
+static Token *scan_ident(Scanner *s) {
     static char buffer[BUFFER_SIZE];
     int buffer_pos = 0;
     int start = s->pos;
@@ -23,14 +18,14 @@ Token *scan_ident(Scanner *s) {
 
     buffer[buffer_pos] = 0;
 
-    interned_string ident = intern_string(buffer);
+    InternedString ident = intern_string(buffer);
 
     Token *t = create_token(ident < TOKEN_IDENTIFIER ? ident : TOKEN_IDENTIFIER, start, buffer_pos);
     t->ident = ident;
     return t;
 }
 
-Token *scan_number(Scanner *s) {
+static Token *scan_number(Scanner *s) {
     long value = 0;
     int start = s->pos;
 
@@ -44,18 +39,18 @@ Token *scan_number(Scanner *s) {
     return t;
 }
 
-void skip_whitespace(Scanner *s) {
+static void skip_whitespace(Scanner *s) {
     while (*(s->src + s->pos) == ' ' || *(s->src + s->pos) == '\t' || *(s->src + s->pos) == '\n')
         s->pos++;
 }
 
-Token *single_char(Scanner *s, TokenKind kind) {
+static Token *single_char(Scanner *s, TokenKind kind) {
     s->current_token = create_token(kind, s->pos, 1);
     s->pos++;
     return s->current_token;
 }
 
-Token *single_or_double_char(Scanner *s, char next_char, TokenKind next_char_token_kind, TokenKind kind) {
+static Token *single_or_double_char(Scanner *s, char next_char, TokenKind next_char_token_kind, TokenKind kind) {
     int start = s->pos++;
 
     if (*(s->src + s->pos) == next_char) {
