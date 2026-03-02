@@ -28,6 +28,7 @@ typedef enum {
     TOKEN_RBRACKET,
     TOKEN_LPAREN,
     TOKEN_RPAREN,
+	TOKEN_COLON,
 
     // Multiplication precedence
 	TOKEN_BINARY_OP_START,

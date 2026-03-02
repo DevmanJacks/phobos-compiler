@@ -108,6 +108,9 @@ Token *next_token(Scanner *s) {
         case ')':
             return single_char(s, TOKEN_RPAREN);
 
+        case ':':
+            return single_or_double_char(s, '=', TOKEN_DECLARE_ASSIGN, TOKEN_COLON);
+
         case '>':
             return single_or_double_char(s, '=', TOKEN_GE, TOKEN_GT);
 

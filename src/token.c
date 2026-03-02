@@ -76,6 +76,7 @@ extern char *token_kind_string(TokenKind kind) {
         case TOKEN_RBRACKET: return "RBRACKET";
         case TOKEN_LPAREN: return "LPAREN";
         case TOKEN_RPAREN: return "RPAREN";
+        case TOKEN_COLON: return "COLON";
         
         // Assignment
         case TOKEN_ASSIGN: return "ASSIGN";
