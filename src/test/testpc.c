@@ -50,6 +50,11 @@ void test_passed(const char *test) {
     num_tests++;
 }
 
+void multiple_tests_passed(const char *test_func, int num_tests_passed) {
+    printf("  \e[0;37m%s:\e[0;32m - [%d] PASSED\e[0m\n", test_func, num_tests_passed);
+    num_tests += num_tests_passed;
+}
+
 int main(int argc, char **argv) {
     testing_start("Phobos Compiler");
     intern_test();

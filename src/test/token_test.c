@@ -7,13 +7,24 @@
 #include "testing.h"
 
 static void test_operator_precedence() {
-    Token *add_token = create_token(TOKEN_ADD, 0, 1);
+    int token_kinds[] = { TOKEN_ADD, TOKEN_SUB, TOKEN_MUL, TOKEN_DIV, TOKEN_EQ, TOKEN_NOT_EQ, TOKEN_LT, TOKEN_LE, TOKEN_GT, TOKEN_GE };
+    int precidences[] = { 4, 4 , 5, 5, 3, 3, 3, 3, 3, 3 };
+    int num_operators = sizeof(token_kinds) / sizeof(int);
+    int num_tests_passed = 0;
 
-    if (operator_precedence(add_token) != 4) {
-        test_failed("operator_precedence()", "Precedence of + should be 4.");
-    } else {
-        test_passed("operator_precedence()");
+    for (int i = 0; i < num_operators; i++) {
+        Token *token = create_token(token_kinds[i], 0, 1);
+
+        if (operator_precedence(token) == precidences[i])
+            num_tests_passed++;
+        else
+            test_failed("operator_precedence()", "Precedence of %s should be %d.", token_kind_string(token_kinds[i]), precidences[i]);
+
+        free(token);
     }
+
+    if (num_tests_passed > 0)
+        multiple_tests_passed("operator_precedence()", num_tests_passed);
 }
 
 static void test_token_initialise() {

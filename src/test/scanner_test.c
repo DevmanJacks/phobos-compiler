@@ -30,19 +30,19 @@ static void test_multi_character_tokens() {
     int num_tokens = sizeof(token_type) / sizeof(int);
 
     Scanner *s = create_scanner(src);
-    bool tests_passed = true;
+    int tests_failed = 0;
 
     for (int i = 0; i < num_tokens; i++) {
         if (s->current_token->kind != token_type[i]) {
             test_failed("test_multi_character_tokens()", "Bad token - expected: %s, got: %s", token_kind_string(token_type[i]), token_kind_string(s->current_token->kind));
-            tests_passed = false;
+            tests_failed++;
         }
 
         next_token(s);
     }
 
-    if (tests_passed)
-        test_passed("test_multi_character_tokens()");
+    if (num_tokens - tests_failed > 0)
+        multiple_tests_passed("test_multi_character_tokens()", num_tokens - tests_failed);
 }
 
 static void test_single_character_tokens() {
@@ -53,19 +53,19 @@ static void test_single_character_tokens() {
     int num_tokens = sizeof(token_type) / sizeof(int);
 
     Scanner *s = create_scanner(src);
-    bool tests_passed = true;
+    int tests_failed = 0;
 
     for (int i = 0; i < num_tokens; i++) {
         if (s->current_token->kind != token_type[i]) {
             test_failed("test_single_character_tokens()", "Bad token - expected: %s, got: %s", token_kind_string(token_type[i]), token_kind_string(s->current_token->kind));
-            tests_passed = false;
+            tests_failed++;
         }
 
         next_token(s);
     }
 
-    if (tests_passed)
-        test_passed("test_single_character_tokens()");
+    if (num_tokens - tests_failed > 0)
+        multiple_tests_passed("test_single_character_tokens()", num_tokens - tests_failed);
 }
 
 extern void scanner_test() {
