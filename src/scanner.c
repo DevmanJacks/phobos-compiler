@@ -69,10 +69,10 @@ Token *next_token(Scanner *s) {
     skip_whitespace(s);
 
     if (s->pos == s->len) {
-        if (s->current_token->kind == TOKEN_EOF)
-            return s->current_token;
+        if (s->current_token->kind != TOKEN_EOF)
+            s->current_token = create_token(TOKEN_EOF, s->pos, 1);
 
-        return create_token(TOKEN_EOF, s->pos, 1);
+        return s->current_token;
     }
 
     char c = *(s->src + s->pos);
@@ -151,6 +151,9 @@ Scanner *create_scanner(char *src) {
 
     s->current_token = 0;
 
+    // Initialise the keywords
+    token_initialise();
+    
     // Prime the scanner
     next_token(s);
 

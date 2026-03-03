@@ -10,8 +10,8 @@ DBGCFLAGS = -g -O0 -DDEBUG -std=c11
 LFLAGS = 
 
 # Object files
-OBJECTS = $(OBJDIR)/intern.o $(OBJDIR)/scanner.o $(OBJDIR)/source.o $(OBJDIR)/token.o $(OBJDIR)/pc.o
-TSTOBJS = $(OBJDIR)/intern_test.o $(OBJDIR)/scanner_test.o $(OBJDIR)/source_test.o $(OBJDIR)/token_test.o $(OBJDIR)/testpc.o
+OBJECTS = $(OBJDIR)/ast.o $(OBJDIR)/intern.o $(OBJDIR)/scanner.o $(OBJDIR)/source.o $(OBJDIR)/token.o $(OBJDIR)/pc.o
+TSTOBJS = $(OBJDIR)/ast_test.o $(OBJDIR)/intern_test.o $(OBJDIR)/scanner_test.o $(OBJDIR)/source_test.o $(OBJDIR)/token_test.o $(OBJDIR)/testpc.o
 
 # Default build
 all: pc testpc
@@ -21,6 +21,9 @@ pc: $(OBJECTS)
 
 testpc: $(TSTOBJS)
 	$(CC) -o testpc $^ $(LFLAGS)
+
+$(OBJDIR)/ast.o: $(SRCDIR)/ast.c $(SRCDIR)/ast.h $(SRCDIR)/error.h $(SRCDIR)/token.h
+	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
 $(OBJDIR)/intern.o: $(SRCDIR)/intern.c $(SRCDIR)/intern.h
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
@@ -37,9 +40,6 @@ $(OBJDIR)/error.o: $(SRCDIR)/error.c $(SRCDIR)/error.h
 $(OBJDIR)/scanner.o: $(SRCDIR)/scanner.c $(SRCDIR)/error.h $(SRCDIR)/intern.h $(SRCDIR)/scanner.h $(SRCDIR)/token.h
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
-# $(OBJDIR)/ast.o: $(SRCDIR)/ast.c $(SRCDIR)/ast.h $(SRCDIR)/source.h
-# 	$(CC) -c $(DBGCFLAGS) -o $@ $<
-
 # $(OBJDIR)/parser.o: $(SRCDIR)/parser.c $(SRCDIR)/ast.h $(SRCDIR)/parser.h $(SRCDIR)/scanner.h $(SRCDIR)/token.h
 # 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
@@ -47,6 +47,9 @@ $(OBJDIR)/pc.o: $(SRCDIR)/pc.c
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 
 # Tests
+$(OBJDIR)/ast_test.o: $(TSTSRCDIR)/ast_test.c $(SRCDIR)/ast.c $(SRCDIR)/ast.h $(TSTSRCDIR)/testing.h
+	$(CC) -c $(DBGCFLAGS) -o $@ $<
+
 $(OBJDIR)/intern_test.o: $(TSTSRCDIR)/intern_test.c $(SRCDIR)/intern.c $(SRCDIR)/intern.h $(TSTSRCDIR)/testing.h
 	$(CC) -c $(DBGCFLAGS) -o $@ $<
 

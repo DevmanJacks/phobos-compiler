@@ -22,7 +22,9 @@ unsigned int operator_precedence(Token *op_token) {
 }
 
 extern void token_initialise() {
-    // Intern all of the keywords
+    string_intern_initialise();
+
+    // Intern all keywords
     intern_string("const");
     intern_string("defer");
     intern_string("else");

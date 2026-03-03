@@ -2,11 +2,7 @@
  * Abstract Syntax Tree functionality for Phobos programming language.
  */
 
- typedef enum {
-    ASTNODE_BINARY_EXPR,
-    ASTNODE_IDENTIFIER,
-    ASTNODE_NUMERIC_LITERAL
- } AstNodeType;
+#include "ast.h"
 
 char *astnode_type_string(AstNodeType type) {
     switch (type) {
@@ -18,19 +14,7 @@ char *astnode_type_string(AstNodeType type) {
     }
 }
 
- typedef struct ast_node {
-    AstNodeType type;
-    union {
-        struct {
-            struct ast_node *left;
-            Token *op;
-            struct ast_node *right;
-        } binary_expr;
-        Token *token;
-    };
- } AstNode;
-
- int astnode_start(AstNode *node) {
+int astnode_start(AstNode *node) {
     switch (node->type) {
         case ASTNODE_BINARY_EXPR:
             return 0;
@@ -38,9 +22,9 @@ char *astnode_type_string(AstNodeType type) {
         default:
             return node->token->start;
     }
- }
+}
 
- int astnode_len(AstNode *node) {
+int astnode_len(AstNode *node) {
     switch (node->type) {
         case ASTNODE_BINARY_EXPR:        
             while (node->binary_expr.right->type == ASTNODE_BINARY_EXPR)
@@ -51,9 +35,9 @@ char *astnode_type_string(AstNodeType type) {
         default:
             return node->token->len;
     }
- }
+}
 
- AstNode *create_binary_expr_astnode(AstNode *left, Token *op, AstNode *right) {
+AstNode *create_binary_expr_astnode(AstNode *left, Token *op, AstNode *right) {
         AstNode *node = malloc(sizeof(AstNode));
 
     if (!node) {
@@ -65,9 +49,9 @@ char *astnode_type_string(AstNodeType type) {
     node->binary_expr.left = left;
     node->binary_expr.op = op;
     node->binary_expr.right = right;
- }
+}
 
- AstNode *create_identifier_astnode(Token *t) {
+AstNode *create_identifier_astnode(Token *t) {
     AstNode *node = malloc(sizeof(AstNode));
 
     if (!node) {
@@ -77,9 +61,9 @@ char *astnode_type_string(AstNodeType type) {
 
     node->type = ASTNODE_IDENTIFIER;
     node->token = t;
- }
+}
 
-  AstNode *create_integer_literal_astnode(Token *t) {
+AstNode *create_integer_literal_astnode(Token *t) {
     AstNode *node = malloc(sizeof(AstNode));
 
     if (!node) {
@@ -89,9 +73,9 @@ char *astnode_type_string(AstNodeType type) {
 
     node->type = ASTNODE_NUMERIC_LITERAL;
     node->token = t;
- }
+}
 
- void print_astnode(FILE *file, AstNode *node) {
+void print_astnode(FILE *file, AstNode *node) {
     fprintf(file, "{ \"node\": \"%s\", \"start\": %d, \"len\": %d", astnode_type_string(node->type), astnode_start(node), astnode_len(node));
 
     switch (node->type) {
