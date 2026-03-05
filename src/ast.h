@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ast.h"
 #include "error.h"
 #include "token.h"
 
@@ -22,4 +23,7 @@ typedef struct ast_node {
 } AstNode;
 
 // Public functions
+extern AstNode *create_binary_expr_astnode(AstNode *left, Token *op, AstNode *right);
+extern AstNode *create_identifier_astnode(Token *t);
+extern AstNode *create_integer_literal_astnode(Token *t);
 extern void print_astnode(FILE *file, AstNode *node);

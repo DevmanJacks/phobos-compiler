@@ -2,34 +2,32 @@
  * Parser for Phobos language.
  */
 
- typedef struct {
-    Scanner *scanner;
- } Parser;
+#include "parser.h"
 
- int current_token_is_kind(Parser *p, TokenKind kind) {
-    return p->scanner->current_token->kind == kind;
- }
+int current_token_is_kind(Parser *p, TokenKind kind) {
+   return p->scanner->current_token->kind == kind;
+}
 
- Token *curr_token(Parser *p) {
-   return p->scanner->current_token;
- }
+Token *curr_token(Parser *p) {
+return p->scanner->current_token;
+}
 
- AstNode *parse_operand(Parser *p) {
-    AstNode *node;
+AstNode *parse_operand(Parser *p) {
+   AstNode *node;
 
-    if (current_token_is_kind(p, TOKEN_IDENTIFIER)) {
-        node = create_identifier_astnode(p->scanner->current_token);
-    } else if (current_token_is_kind(p, TOKEN_INTEGER_LITERAL)) {
-        node = create_integer_literal_astnode(p->scanner->current_token);
-    } else {
-        fprintf(stderr, "Unexpected %s token in expression.", token_kind_string(p->scanner->current_token->kind));
-        exit(ESYNTAX_ERROR);
-    }
+   if (current_token_is_kind(p, TOKEN_IDENTIFIER)) {
+      node = create_identifier_astnode(p->scanner->current_token);
+   } else if (current_token_is_kind(p, TOKEN_INTEGER_LITERAL)) {
+      node = create_integer_literal_astnode(p->scanner->current_token);
+   } else {
+      fprintf(stderr, "Unexpected %s token in expression.", token_kind_string(p->scanner->current_token->kind));
+      exit(ESYNTAX_ERROR);
+   }
 
-    next_token(p->scanner);
+   next_token(p->scanner);
 
-    return node;
- }
+   return node;
+}
 
 AstNode *parse_binary_expr(Parser *p, unsigned int precidence_level) {
    AstNode *expr = parse_operand(p);

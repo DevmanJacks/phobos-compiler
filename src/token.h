@@ -94,10 +94,11 @@ typedef struct Token {
 } Token;
 
 // Inline functions
-inline bool is_binary_op(Token *token) { return TOKEN_BINARY_OP_START <= token->kind && token->kind <= TOKEN_BINARY_OP_END; }
+static inline bool is_binary_op(Token *token) { return TOKEN_BINARY_OP_START <= token->kind && token->kind <= TOKEN_BINARY_OP_END; }
 
 // Public functions
 extern Token *create_token(TokenKind kind, Pos start, int len);
+extern unsigned int operator_precedence(Token *op_token);
 extern void print_token(FILE *file, Token *t);
 extern void token_initialise();
 extern char *token_kind_string(TokenKind kind);
