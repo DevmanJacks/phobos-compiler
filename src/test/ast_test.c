@@ -41,7 +41,41 @@ static void test_create_binary_expr_astnode() {
     test_passed("create_binary_expr_node()");
 }
 
+static void test_create_identifier_astnode() {
+    AstNode *node = create_identifier_astnode(create_token(TOKEN_IDENTIFIER, 0, 1));
+
+    if (!node) {
+        test_failed("create_identifier_astnode()", "Unable to create AST node");
+        return;
+    }
+
+    if (node->type != ASTNODE_IDENTIFIER) {
+        test_failed("create_identifier_astnode()", "Bad AST type - expected: %s, got: %s", astnode_type_string(ASTNODE_IDENTIFIER), astnode_type_string(node->type));
+        return;
+    }
+
+    test_passed("create_identifier_node()");
+}
+
+static void test_create_integer_literal_astnode() {
+    AstNode *node = create_integer_literal_astnode(create_token(TOKEN_INTEGER_LITERAL, 4, 1));
+
+    if (!node) {
+        test_failed("create_integer_literal_astnode()", "Unable to create AST node");
+        return;
+    }
+
+    if (node->type != ASTNODE_NUMERIC_LITERAL) {
+        test_failed("create_integer_literal_astnode()", "Bad AST type - expected: %s, got: %s", astnode_type_string(ASTNODE_NUMERIC_LITERAL), astnode_type_string(node->type));
+        return;
+    }
+
+    test_passed("create_integer_literal_node()");
+}
+
 extern void ast_test() {
     test_section("Abstract Syntax Tree");
+    test_create_identifier_astnode();
+    test_create_integer_literal_astnode();
     test_create_binary_expr_astnode();
 }
