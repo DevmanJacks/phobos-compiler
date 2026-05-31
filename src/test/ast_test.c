@@ -54,7 +54,7 @@ static void test_create_identifier_astnode() {
         return;
     }
 
-    test_passed("create_identifier_node()");
+    test_passed("create_identifier_astnode()");
 }
 
 static void test_create_integer_literal_astnode() {
@@ -70,7 +70,41 @@ static void test_create_integer_literal_astnode() {
         return;
     }
 
-    test_passed("create_integer_literal_node()");
+    test_passed("create_integer_literal_astnode()");
+}
+
+static void test_create_var_decl_astnode() {
+    Token *var = create_token(TOKEN_VAR, 0, 3);
+    AstNode *ident = create_identifier_astnode(create_token(TOKEN_IDENTIFIER, 4, 1));
+    AstNode *init_expr = create_integer_literal_astnode(create_token(TOKEN_INTEGER_LITERAL, 8, 2));
+
+    AstNode *decl = create_var_decl_astnode(var, ident, init_expr);
+
+    if (!decl) {
+        test_failed("create_var_decl_astnode()", "Unable to create AST node");
+        return;
+    }
+
+    if (decl->type != ASTNODE_VAR_DECL) {
+        test_failed("create_var_decl_astnode()", "Bad AST type - expected: %s, got: %s", astnode_type_string(ASTNODE_NUMERIC_LITERAL), astnode_type_string(decl->type));
+    }
+
+    if (decl->var_decl.var != var) {
+        test_failed("create_var_decl_astnode()", "Bad var_decl.var");
+        return;
+    }
+
+    if (decl->var_decl.ident != ident) {
+        test_failed("create_var_decl_astnode()", "Bad var_decl.ident");
+        return;
+    }
+
+    if (decl->var_decl.init_expr != init_expr) {
+        test_failed("create_var_decl_astnode()", "Bad var_decl.init_value");
+        return;
+    }
+
+    return test_passed("create_var_decl_astnode()");
 }
 
 extern void ast_test() {
@@ -78,4 +112,5 @@ extern void ast_test() {
     test_create_identifier_astnode();
     test_create_integer_literal_astnode();
     test_create_binary_expr_astnode();
+    test_create_var_decl_astnode();
 }

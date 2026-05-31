@@ -9,3 +9,5 @@
  } Parser;
 
  // Public functions
+ extern Parser *create_parser(Scanner *s);
+ extern AstNode *parse(Parser *p);

@@ -121,6 +121,27 @@ static void test_parse_number() {
         multiple_tests_passed("parse_number()", num_tests - num_failed);
 }
 
+static void test_parse_var_decl() {
+    char *src[] = { "var x", "var numPlanets = 8" };
+    char *node_strings[] = { "{ \"node\": \"Variable Declaration\", \"start\": 0, \"len\": 5, \"ident\": { \"node\": \"Identifier\", \"start\": 4, \"len\": 1, \"name\": \"x\" }}",
+                             "{ \"node\": \"Variable Declaration\", \"start\": 0, \"len\": 18, \"ident\": { \"node\": \"Identifier\", \"start\": 4, \"len\": 10, \"name\": \"numPlanets\" }, \"init_expr\": { \"node\": \"Numeric Literal\", \"start\": 17, \"len\": 1, \"value\": 8 }}" };
+
+    int num_tests = sizeof(src) / sizeof(char *);
+    int num_failed = 0;
+
+    for (int i = 0; i < num_tests; i++) {
+        Parser *p = create_test_parser(src[i]);
+    
+        AstNode *node = parse(p);
+    
+        if (!verify_node("parse_var_decl()", node, node_strings[i]))
+            num_failed++;
+    }
+
+    if (num_failed < 5)
+        multiple_tests_passed("parse_var_decl()", num_tests - num_failed);
+}
+
 extern void parser_test() {
     test_section("Parser");
     test_create_parser();
@@ -129,4 +150,7 @@ extern void parser_test() {
     test_parse_identifier();
     test_parse_number();
     test_parse_binary_expr();
+
+    test_section("Parser - Declarations");
+    test_parse_var_decl();
 }

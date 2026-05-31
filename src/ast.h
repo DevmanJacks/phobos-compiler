@@ -7,7 +7,8 @@
  typedef enum {
     ASTNODE_BINARY_EXPR,
     ASTNODE_IDENTIFIER,
-    ASTNODE_NUMERIC_LITERAL
+    ASTNODE_NUMERIC_LITERAL,
+    ASTNODE_VAR_DECL
  } AstNodeType;
 
 typedef struct ast_node {
@@ -19,6 +20,11 @@ typedef struct ast_node {
             struct ast_node *right;
         } binary_expr;
         Token *token;
+        struct {
+            Token *var;
+            struct ast_node *ident;
+            struct ast_node *init_expr;
+        } var_decl;
     };
 } AstNode;
 
@@ -26,4 +32,5 @@ typedef struct ast_node {
 extern AstNode *create_binary_expr_astnode(AstNode *left, Token *op, AstNode *right);
 extern AstNode *create_identifier_astnode(Token *t);
 extern AstNode *create_integer_literal_astnode(Token *t);
+extern AstNode *create_var_decl_astnode(Token *var, AstNode *ident, AstNode *init_expr);
 extern void print_astnode(FILE *file, AstNode *node);
