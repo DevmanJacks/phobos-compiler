@@ -2,7 +2,10 @@
  * Parser for Phobos language.
  */
 
+#include <stdarg.h>
 #include "parser.h"
+
+static AstNode *parse_operand(Parser *p);
 
 static Token *curr_token(Parser *p) {
    return p->scanner->current_token;
@@ -12,9 +15,9 @@ static int current_token_is_kind(Parser *p, TokenKind kind) {
    return p->scanner->current_token->kind == kind;
 }
 
-static int expect_token(Parser *p, TokenKind kind, Token *found_token) {
+static int expect_token(Parser *p, TokenKind kind, Token **found_token) {
    if (p->scanner->current_token->kind == kind) {
-      found_token = p->scanner->current_token;
+      *found_token = p->scanner->current_token;
       next_token(p->scanner);
       return true;
    }
@@ -22,7 +25,6 @@ static int expect_token(Parser *p, TokenKind kind, Token *found_token) {
    // TODO: Handle unexpected token
    return false;
 }
-
 
 /* Errors */
 
@@ -59,7 +61,7 @@ static AstNode *parse_identifier(Parser *p) {
    syntax_error("Expected identifier.");
 }
 
-AstNode *parse_operand(Parser *p) {
+static AstNode *parse_operand(Parser *p) {
    AstNode *node;
 
    if (current_token_is_kind(p, TOKEN_IDENTIFIER)) {
@@ -67,7 +69,7 @@ AstNode *parse_operand(Parser *p) {
    } else if (current_token_is_kind(p, TOKEN_INTEGER_LITERAL)) {
       node = create_integer_literal_astnode(p->scanner->current_token);
    } else {
-      syntax_error(stderr, "Unexpected %s token in expression.", token_kind_string(p->scanner->current_token->kind));
+      syntax_error("Unexpected %s token in expression.", token_kind_string(p->scanner->current_token->kind));
    }
 
    next_token(p->scanner);
