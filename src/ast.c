@@ -47,56 +47,44 @@ int astnode_len(AstNode *node) {
     }
 }
 
-AstNode *create_binary_expr_astnode(AstNode *left, Token *op, AstNode *right) {
-        AstNode *node = malloc(sizeof(AstNode));
+static AstNode *create_astnode(AstNodeType type) {
+    AstNode *node = malloc(sizeof(AstNode));
 
     if (!node) {
-        perror("Unable to create ast node for binary expression.");
+        perror("Unable to create ast node.");
         exit(EOUT_OF_MEMORY);
     }
 
-    node->type = ASTNODE_BINARY_EXPR;
+    node->type = type;
+    return node;
+}
+
+extern AstNode *create_binary_expr_astnode(AstNode *left, Token *op, AstNode *right) {
+    AstNode *node = create_astnode(ASTNODE_BINARY_EXPR);
     node->binary_expr.left = left;
     node->binary_expr.op = op;
     node->binary_expr.right = right;
+    return node;
 }
 
-AstNode *create_identifier_astnode(Token *t) {
-    AstNode *node = malloc(sizeof(AstNode));
-
-    if (!node) {
-        perror("Unable to create ast node for identifier.");
-        exit(EOUT_OF_MEMORY);
-    }
-
-    node->type = ASTNODE_IDENTIFIER;
+extern AstNode *create_identifier_astnode(Token *t) {
+    AstNode *node = create_astnode(ASTNODE_IDENTIFIER);
     node->token = t;
+    return node;
 }
 
-AstNode *create_integer_literal_astnode(Token *t) {
-    AstNode *node = malloc(sizeof(AstNode));
-
-    if (!node) {
-        perror("Unable to create ast node for integer literal.");
-        exit(EOUT_OF_MEMORY);
-    }
-
-    node->type = ASTNODE_NUMERIC_LITERAL;
+extern AstNode *create_integer_literal_astnode(Token *t) {
+    AstNode *node = create_astnode(ASTNODE_NUMERIC_LITERAL);
     node->token = t;
+    return node;
 }
 
 AstNode *create_var_decl_astnode(Token *var, AstNode *ident, AstNode *init_expr) {
-        AstNode *node = malloc(sizeof(AstNode));
-
-    if (!node) {
-        perror("Unable to create ast node for variable declaration.");
-        exit(EOUT_OF_MEMORY);
-    }
-
-    node->type = ASTNODE_VAR_DECL;
+    AstNode *node = create_astnode(ASTNODE_VAR_DECL);
     node->var_decl.var = var;
     node->var_decl.ident = ident;
     node->var_decl.init_expr = init_expr;
+    return node;
 }
 
 void print_astnode(FILE *file, AstNode *node) {

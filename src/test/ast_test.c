@@ -90,17 +90,17 @@ static void test_create_var_decl_astnode() {
     }
 
     if (decl->var_decl.var != var) {
-        test_failed("create_var_decl_astnode()", "Bad var_decl.var");
+        test_failed("create_var_decl_astnode()", "Start of node not set or set incorrectly.");
         return;
     }
 
     if (decl->var_decl.ident != ident) {
-        test_failed("create_var_decl_astnode()", "Bad var_decl.ident");
+        test_failed("create_var_decl_astnode()", "Identifier not set or set incorrectly.");
         return;
     }
 
     if (decl->var_decl.init_expr != init_expr) {
-        test_failed("create_var_decl_astnode()", "Bad var_decl.init_value");
+        test_failed("create_var_decl_astnode()", "Initial expression not set or set incorrectly.");
         return;
     }
 
