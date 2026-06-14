@@ -76,9 +76,10 @@ static void test_create_integer_literal_astnode() {
 static void test_create_var_decl_astnode() {
     Token *var = create_token(TOKEN_VAR, 0, 3);
     AstNode *ident = create_identifier_astnode(create_token(TOKEN_IDENTIFIER, 4, 1));
-    AstNode *init_expr = create_integer_literal_astnode(create_token(TOKEN_INTEGER_LITERAL, 8, 2));
+    AstNode *declared_type = create_identifier_astnode(create_token(TOKEN_IDENTIFIER, 7, 3));
+    AstNode *init_expr = create_integer_literal_astnode(create_token(TOKEN_INTEGER_LITERAL, 13, 2));
 
-    AstNode *decl = create_var_decl_astnode(var, ident, init_expr);
+    AstNode *decl = create_var_decl_astnode(var, ident, declared_type, init_expr);
 
     if (!decl) {
         test_failed("create_var_decl_astnode()", "Unable to create AST node");
@@ -96,6 +97,11 @@ static void test_create_var_decl_astnode() {
 
     if (decl->var_decl.ident != ident) {
         test_failed("create_var_decl_astnode()", "Identifier not set or set incorrectly.");
+        return;
+    }
+
+    if (decl->var_decl.declared_type != declared_type) {
+        test_failed("create_var_decl_astnode()", "Declared type not set or set incorrectly.");
         return;
     }
 

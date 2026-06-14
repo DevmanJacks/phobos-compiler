@@ -3,9 +3,16 @@
  */
 
 #include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 #include "error.h"
+#include "intern.h"
 #include "scanner.h"
+#include "token.h"
+
+static inline int8_t curr_char(Scanner *s) {
+    return *(s->source_file->code + s->pos);
+} 
 
 #define BUFFER_SIZE 128
 
@@ -14,8 +21,9 @@ static Token *scan_ident(Scanner *s) {
     int buffer_pos = 0;
     int start = s->pos;
 
-    while (isalnum(*(s->src + s->pos)) || *(s->src + s->pos) == '_') {
-        buffer[buffer_pos++] = *(s->src + s->pos++);
+    while (isalnum(curr_char(s)) || curr_char(s) == '_') {
+        buffer[buffer_pos++] = curr_char(s);
+        s->pos++;
     }
 
     buffer[buffer_pos] = 0;
@@ -31,9 +39,10 @@ static Token *scan_number(Scanner *s) {
     long value = 0;
     int start = s->pos;
 
-    while (isdigit(*(s->src + s->pos))) {
-        char digit = *(s->src + s->pos++) - '0';
+    while (isdigit(curr_char(s))) {
+        char digit = curr_char(s) - '0';
         value = value * 10 + digit;
+        s->pos++;
     }
 
     Token *t = create_token(TOKEN_INTEGER_LITERAL, start, s->pos - start);
@@ -42,7 +51,7 @@ static Token *scan_number(Scanner *s) {
 }
 
 static void skip_whitespace(Scanner *s) {
-    while (*(s->src + s->pos) == ' ' || *(s->src + s->pos) == '\t' || *(s->src + s->pos) == '\n')
+    while (curr_char(s) == ' ' || curr_char(s)== '\t' || curr_char(s) == '\n')
         s->pos++;
 }
 
@@ -55,7 +64,7 @@ static Token *single_char(Scanner *s, TokenKind kind) {
 static Token *single_or_double_char(Scanner *s, char next_char, TokenKind next_char_token_kind, TokenKind kind) {
     int start = s->pos++;
 
-    if (*(s->src + s->pos) == next_char) {
+    if (curr_char(s) == next_char) {
         s->pos++;
         s->current_token = create_token(next_char_token_kind, start, 2);
     }
@@ -68,16 +77,14 @@ static Token *single_or_double_char(Scanner *s, char next_char, TokenKind next_c
 Token *next_token(Scanner *s) {
     skip_whitespace(s);
 
-    if (s->pos == s->len) {
+    if (s->pos >= s->source_file->length) {
         if (s->current_token->kind != TOKEN_EOF)
             s->current_token = create_token(TOKEN_EOF, s->pos, 1);
 
         return s->current_token;
     }
 
-    char c = *(s->src + s->pos);
-
-    switch (c) {
+    switch (curr_char(s)) {
         case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm':
         case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':
         case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M':
@@ -133,11 +140,11 @@ Token *next_token(Scanner *s) {
             return single_or_double_char(s, '=', TOKEN_DIV_ASSIGN, TOKEN_DIV);
     }
 
-    fprintf(stderr, "Unexpected character \'%c\' in source file.", c);
+    fprintf(stderr, "Unexpected character \'%c\' in source file.", curr_char(s));
     exit(EUNEXPECTED_CHARACTER);
 }
 
-Scanner *create_scanner(char *src) {
+Scanner *create_test_scanner(char *src) {
     Scanner *s = malloc(sizeof(Scanner));
 
     if (!s) {
@@ -145,10 +152,7 @@ Scanner *create_scanner(char *src) {
         exit(EOUT_OF_MEMORY);
     }
 
-    s->src = src;
-    s->len = strlen(src);
-    s->pos = 0;
-
+    s->source_file = NULL;
     s->current_token = 0;
 
     // Initialise the keywords
@@ -158,4 +162,34 @@ Scanner *create_scanner(char *src) {
     next_token(s);
 
     return s;
+}
+
+Scanner *create_scanner_for_source_file(SourceFile *source_file) {
+    Scanner *s = malloc(sizeof(Scanner));
+    
+    if (!s) {
+        perror("Unable to create scanner.");
+        exit(EOUT_OF_MEMORY);
+    }
+    
+    s->source_file = source_file;
+    s->current_token = 0;
+    
+    // Initialise the keywords
+    token_initialise();
+    
+    // Prime the scanner
+    next_token(s);
+
+    return s;
+}
+
+void scan_source_file(SourceFile *source_file) {
+    Scanner *s = create_scanner_for_source_file(source_file);
+
+    while (s->current_token->kind != TOKEN_EOF) {
+        print_token(stderr, s->current_token);
+        fprintf(stderr, "\n");
+        next_token(s);
+    }
 }

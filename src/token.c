@@ -3,6 +3,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "error.h"
 #include "token.h"
 
@@ -39,7 +40,7 @@ extern void token_initialise() {
     intern_string("while");
 }
 
-extern Token *create_token(TokenKind kind, int start, int len) {
+extern Token *create_token(TokenKind kind, long start, int len) {
     Token *new_token = malloc(sizeof(Token));
 
     if (!new_token) {

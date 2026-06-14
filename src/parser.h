@@ -1,13 +1,12 @@
 #pragma once
 
-#include "ast.h"
 #include "scanner.h"
-#include "token.h"
+#include "source.h"
 
- typedef struct {
-    Scanner *scanner;
- } Parser;
+typedef struct parser {
+    SourceFile *source_file;
+    Scanner    *scanner;
+} Parser;
 
- // Public functions
- extern Parser *create_parser(Scanner *s);
- extern AstNode *parse(Parser *p);
+// Public functions
+extern void parse_source_file(SourceFile *source_file);

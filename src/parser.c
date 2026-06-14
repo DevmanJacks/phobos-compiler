@@ -3,9 +3,13 @@
  */
 
 #include <stdarg.h>
+#include "error.h"
 #include "parser.h"
+#include "scanner.h"
+#include "source.h"
 
 static AstNode *parse_operand(Parser *p);
+static AstNode *parse_type(Parser *p);
 
 static Token *curr_token(Parser *p) {
    return p->scanner->current_token;
@@ -26,6 +30,10 @@ static int expect_token(Parser *p, TokenKind kind, Token **found_token) {
    return false;
 }
 
+static void skip_token(Parser *p) {
+   next_token(p->scanner);
+}
+
 /* Errors */
 
 static void syntax_error(char *msg, ...) {
@@ -33,7 +41,7 @@ static void syntax_error(char *msg, ...) {
    va_start(args, msg);
    vfprintf(stderr, msg, args);
    va_end(args);
-   exit(ESYNTAX_ERROR);
+   exit(-1);
 }
 
 /* Expressions */
@@ -95,15 +103,20 @@ AstNode *parse_var_decl(Parser *p) {
 
    if (expect_token(p, TOKEN_IDENTIFIER, &ident_token)) {
       AstNode *ident = create_identifier_astnode(ident_token);
+      AstNode *declared_type = NULL;
+
+      if (current_token_is_kind(p, TOKEN_COLON)) {
+         declared_type = parse_type(p);
+      }
 
       if (current_token_is_kind(p, TOKEN_ASSIGN)) {
          next_token(p->scanner);
 
          AstNode *init_expr = parse_expr(p);
-         return create_var_decl_astnode(var, ident, init_expr);
+         return create_var_decl_astnode(var, ident, declared_type, init_expr);
       }
       else
-         return create_var_decl_astnode(var, ident, NULL);
+         return create_var_decl_astnode(var, ident, declared_type, NULL);
    } else {
       // TODO: Log error and recover
    }
@@ -121,12 +134,26 @@ static AstNode *parse_declaration(Parser *p) {
    }
 }
 
+/* Types */
+
+AstNode *parse_type(Parser *p) {
+   if (current_token_is_kind(p, TOKEN_COLON))
+      skip_token(p);
+
+   switch (curr_token(p)->kind) {
+      case TOKEN_IDENTIFIER:
+         return parse_identifier(p);
+
+      default:
+         syntax_error("Expected identifier.");
+   }
+}
 
 AstNode *parse(Parser *p) {
    return parse_declaration(p);
 }
 
-Parser *create_parser(Scanner *s) {
+void parse_source_file(SourceFile *source_file) {
    Parser *p = malloc(sizeof(Parser));
 
    if (!p) {
@@ -134,6 +161,7 @@ Parser *create_parser(Scanner *s) {
       exit(EOUT_OF_MEMORY);
    }
 
-   p->scanner = s;
-   return p;
+   p->scanner = create_scanner_for_source_file(source_file);
+
+   parse(p);
 }

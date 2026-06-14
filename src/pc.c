@@ -2,15 +2,57 @@
  * Phobos compiler entry point.
  */
 
-#include "intern.h"
-#include "token.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include "error.h"
+#include "parser.h"
+#include "source.h"
 
-void main(int argc, char **argv) {   
-    // //Scanner *s = create_scanner("const defer else enum func for if import interface struct var while");
-    // //Scanner *s = create_scanner("if a > 3 b = true else b = false");
-    // Scanner *s = create_scanner("abc * 10 + 3 * 4");
-    // Parser *p = create_parser(s);
+// Linked list of source files that we will include in the compilation
+static SourceFile *source_files = NULL;
 
-    // AstNode *expr = parse(p);
-    // print_astnode(stderr, expr);
+static void fatal_error(char *msg) {
+    perror(msg);
+    exit(-1);
+}
+
+static void display_usage() {
+    fprintf(stderr, "Usage: pc [-scanonly] <input file>\n");
+}
+
+void main(int argc, char **argv) {
+    if (argc < 2) {
+        display_usage();
+        exit(EINVALID_CMDLINE_ARGS);
+    }
+
+    // Command line parameters
+    bool scan_only = false;
+    char *filename = NULL;
+
+    for (int i = 1; i < argc; i++) {
+        char *arg = *(argv + i);
+
+        if (*arg == '-') {
+            if (strcmp(arg, "-scanonly") == 0)
+                scan_only = true;
+            else
+                display_usage();
+        } else if (!filename)
+            filename = arg;
+        else
+            display_usage();
+    }
+
+    SourceFile *source_file = create_source_file(filename);
+
+    if (scan_only)
+        scan_source_file(source_file);
+    else {
+        source_file->next = source_files;
+        source_files = source_file;
+        parse_source_file(source_file);
+    }
 }

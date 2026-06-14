@@ -10,7 +10,7 @@ DBGCFLAGS = -g -O0 -DDEBUG -std=c11
 LFLAGS = 
 
 # Object files
-OBJECTS = $(OBJDIR)/ast.o $(OBJDIR)/intern.o $(OBJDIR)/parser.o $(OBJDIR)/scanner.o $(OBJDIR)/source.o $(OBJDIR)/token.o $(OBJDIR)/pc.o
+OBJECTS = $(OBJDIR)/ast.o $(OBJDIR)/error.o  $(OBJDIR)/intern.o $(OBJDIR)/parser.o $(OBJDIR)/scanner.o $(OBJDIR)/source.o $(OBJDIR)/token.o $(OBJDIR)/pc.o
 TSTOBJS = $(OBJDIR)/ast_test.o $(OBJDIR)/intern_test.o $(OBJDIR)/parser_test.o $(OBJDIR)/scanner_test.o $(OBJDIR)/scanner_test.o $(OBJDIR)/source_test.o $(OBJDIR)/token_test.o $(OBJDIR)/testpc.o
 
 # Default build

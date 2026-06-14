@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "intern.h"
-#include "source.h"
 
 typedef enum {
     TOKEN_CONST = 0,
@@ -97,7 +96,7 @@ typedef struct Token {
 static inline bool is_binary_op(Token *token) { return TOKEN_BINARY_OP_START <= token->kind && token->kind <= TOKEN_BINARY_OP_END; }
 
 // Public functions
-extern Token *create_token(TokenKind kind, Pos start, int len);
+extern Token *create_token(TokenKind kind, long start, int len);
 extern unsigned int operator_precedence(Token *op_token);
 extern void print_token(FILE *file, Token *t);
 extern void token_initialise();

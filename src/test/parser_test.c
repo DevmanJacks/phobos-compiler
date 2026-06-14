@@ -9,8 +9,8 @@
 
 // Helper functions
 static Parser *create_test_parser(char *src) {
-    Scanner *s = create_scanner(src);
-    Parser *p = create_parser(s);
+    Scanner *s = create_test_scanner(src);
+    Parser *p = NULL;//create_parser_for_scanner(s);
 
     return p;
 }
@@ -41,8 +41,8 @@ static bool verify_node(char *fn, AstNode *node, char *expected_output) {
 
 static void test_create_parser() {
     char *src = "a := 1";
-    Scanner *s = create_scanner(src);
-    Parser *p = create_parser(s);
+    Scanner *s = create_test_scanner(src);
+    Parser *p = NULL;//create_parser_for_scanner(s);
 
     if (p->scanner == s) {
         test_passed("create_parser()");

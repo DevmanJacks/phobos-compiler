@@ -10,22 +10,22 @@ static void test_create_scanner() {
     char *src = "+";
     size_t length = 1;
 
-    Scanner *s = create_scanner(src);
+    Scanner *s = create_test_scanner(src);
 
-    if (s->src = src) {
-        if (s->len = strlen(src)) {
-            test_passed("create_scanner()");
-        } else {
-            test_failed("create_scanner()", "Bad length - expected: %ld, got: %ld", length, s->len);
-        }
-    } else {
+    // if (s->src = src) {
+    //     if (s->len = strlen(src)) {
+    //         test_passed("create_scanner()");
+    //     } else {
+    //         test_failed("create_scanner()", "Bad length - expected: %ld, got: %ld", length, s->len);
+    //     }
+    // } else {
         test_failed("create_scanner()", "Bad src");
-    }
+    //}
 }
 
 static void test_identifier_token() {
     char *src = "ident _test i __wibble";
-    Scanner *s = create_scanner(src);
+    Scanner *s = create_test_scanner(src);
     int tests_failed = 0;
     int tests_passed = 0;
 
@@ -51,7 +51,7 @@ static void test_keyword_tokens() {
                         
     int num_tokens = sizeof(token_type) / sizeof(int);
 
-    Scanner *s = create_scanner(src);
+    Scanner *s = create_test_scanner(src);
     int tests_failed = 0;
 
     for (int i = 0; i < num_tokens; i++) {
@@ -73,7 +73,7 @@ static void test_multi_character_tokens() {
                         
     int num_tokens = sizeof(token_type) / sizeof(int);
 
-    Scanner *s = create_scanner(src);
+    Scanner *s = create_test_scanner(src);
     int tests_failed = 0;
 
     for (int i = 0; i < num_tokens; i++) {
@@ -96,7 +96,7 @@ static void test_number_tokens() {
                         
     int num_tokens = sizeof(token_types) / sizeof(int);
 
-    Scanner *s = create_scanner(src);
+    Scanner *s = create_test_scanner(src);
     int tests_failed = 0;
 
     for (int i = 0; i < num_tokens; i++) {
@@ -122,7 +122,7 @@ static void test_single_character_tokens() {
                         
     int num_tokens = sizeof(token_type) / sizeof(int);
 
-    Scanner *s = create_scanner(src);
+    Scanner *s = create_test_scanner(src);
     int tests_failed = 0;
 
     for (int i = 0; i < num_tokens; i++) {

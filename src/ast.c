@@ -2,7 +2,9 @@
  * Abstract Syntax Tree functionality for Phobos programming language.
  */
 
+#include <stdlib.h>
 #include "ast.h"
+#include "error.h"
 
 char *astnode_type_string(AstNodeType type) {
     switch (type) {
@@ -79,10 +81,11 @@ extern AstNode *create_integer_literal_astnode(Token *t) {
     return node;
 }
 
-AstNode *create_var_decl_astnode(Token *var, AstNode *ident, AstNode *init_expr) {
+AstNode *create_var_decl_astnode(Token *var, AstNode *ident, AstNode *declared_type, AstNode *init_expr) {
     AstNode *node = create_astnode(ASTNODE_VAR_DECL);
     node->var_decl.var = var;
     node->var_decl.ident = ident;
+    node->var_decl.declared_type = declared_type;
     node->var_decl.init_expr = init_expr;
     return node;
 }
