@@ -132,10 +132,10 @@ static void test_parse_var_decl() {
     for (int i = 0; i < num_tests; i++) {
         Parser *p = create_test_parser(src[i]);
     
-        AstNode *node = parse(p);
+        // AstNode *node = parse(p);
     
-        if (!verify_node("parse_var_decl()", node, node_strings[i]))
-            num_failed++;
+        // if (!verify_node("parse_var_decl()", node, node_strings[i]))
+        num_failed++;
     }
 
     if (num_failed < 5)

@@ -149,8 +149,14 @@ AstNode *parse_type(Parser *p) {
    }
 }
 
-AstNode *parse(Parser *p) {
-   return parse_declaration(p);
+static void parse(Parser *p) {
+   AstNode *decl = NULL;
+
+   while (curr_token(p)->kind != TOKEN_EOF) {
+      decl = parse_declaration(p);
+      decl->next = p->source_file->decls;
+      p->source_file->decls = decl;
+   }
 }
 
 void parse_source_file(SourceFile *source_file) {
@@ -161,6 +167,7 @@ void parse_source_file(SourceFile *source_file) {
       exit(EOUT_OF_MEMORY);
    }
 
+   p->source_file = source_file;
    p->scanner = create_scanner_for_source_file(source_file);
 
    parse(p);

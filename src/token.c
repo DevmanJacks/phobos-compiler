@@ -80,6 +80,9 @@ extern char *token_kind_string(TokenKind kind) {
         case TOKEN_LPAREN: return "LPAREN";
         case TOKEN_RPAREN: return "RPAREN";
         case TOKEN_COLON: return "COLON";
+        case TOKEN_COMMA: return "COMMA";
+        case TOKEN_DOT: return "DOT";
+        case TOKEN_FUNC_RETURN: return "FUNC_RETURN";
         
         // Assignment
         case TOKEN_ASSIGN: return "ASSIGN";

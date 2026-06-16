@@ -28,6 +28,10 @@ typedef enum {
     TOKEN_LPAREN,
     TOKEN_RPAREN,
 	TOKEN_COLON,
+	TOKEN_COMMA,
+	TOKEN_DOT,
+	TOKEN_NOT,
+	TOKEN_FUNC_RETURN,
 
     // Multiplication precedence
 	TOKEN_BINARY_OP_START,

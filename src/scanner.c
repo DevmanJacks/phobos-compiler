@@ -74,6 +74,22 @@ static Token *single_or_double_char(Scanner *s, char next_char, TokenKind next_c
     return s->current_token;
 }
 
+static Token *single_or_double_char_2(Scanner *s, char first_next_char, TokenKind first_next_char_token_kind, char second_next_char, TokenKind second_next_char_token_kind, TokenKind kind) {
+    int start = s->pos++;
+
+    if (curr_char(s) == first_next_char) {
+        s->pos++;
+        s->current_token = create_token(first_next_char_token_kind, start, 2);
+    }
+    else if (curr_char(s) == second_next_char) {
+        s->pos++;
+        s->current_token = create_token(second_next_char_token_kind, start, 2);
+    } else
+        s->current_token = create_token(kind, start, 1);
+
+    return s->current_token;
+}
+
 Token *next_token(Scanner *s) {
     skip_whitespace(s);
 
@@ -97,47 +113,25 @@ Token *next_token(Scanner *s) {
             s->current_token = scan_number(s);
             return s->current_token;
 
-        case '{':
-            return single_char(s, TOKEN_LBRACE);
+        case '{': return single_char(s, TOKEN_LBRACE);
+        case '}': return single_char(s, TOKEN_RBRACE);
+        case '[': return single_char(s, TOKEN_LBRACKET);
+        case ']': return single_char(s, TOKEN_RBRACKET);
+        case '(': return single_char(s, TOKEN_LPAREN);
+        case ')': return single_char(s, TOKEN_RPAREN);
+        case ',': return single_char(s, TOKEN_COMMA);
+        case '.': return single_char(s, TOKEN_DOT);
 
-        case '}':
-            return single_char(s, TOKEN_RBRACE);
+        case ':': return single_or_double_char(s, '=', TOKEN_DECLARE_ASSIGN, TOKEN_COLON);
+        case '>': return single_or_double_char(s, '=', TOKEN_GE, TOKEN_GT);
+        case '<': return single_or_double_char(s, '=', TOKEN_LE, TOKEN_LT);
+        case '=': return single_or_double_char(s, '=', TOKEN_EQ, TOKEN_ASSIGN);
+        case '+': return single_or_double_char(s, '=', TOKEN_ADD_ASSIGN, TOKEN_ADD);  
+        case '*': return single_or_double_char(s, '=', TOKEN_MUL_ASSIGN, TOKEN_MUL);
+        case '/': return single_or_double_char(s, '=', TOKEN_DIV_ASSIGN, TOKEN_DIV);
+        case '!': return single_or_double_char(s, '=', TOKEN_NOT_EQ, TOKEN_NOT);
 
-        case '[':
-            return single_char(s, TOKEN_LBRACKET);
-
-        case ']':
-            return single_char(s, TOKEN_RBRACKET);
-
-        case '(':
-            return single_char(s, TOKEN_LPAREN);
-
-        case ')':
-            return single_char(s, TOKEN_RPAREN);
-
-        case ':':
-            return single_or_double_char(s, '=', TOKEN_DECLARE_ASSIGN, TOKEN_COLON);
-
-        case '>':
-            return single_or_double_char(s, '=', TOKEN_GE, TOKEN_GT);
-
-        case '<':
-            return single_or_double_char(s, '=', TOKEN_LE, TOKEN_LT);
-
-        case '=':
-            return single_or_double_char(s, '=', TOKEN_EQ, TOKEN_ASSIGN);
-
-        case '+':
-            return single_or_double_char(s, '=', TOKEN_ADD_ASSIGN, TOKEN_ADD);
-
-        case '-':
-            return single_or_double_char(s, '=', TOKEN_SUB_ASSIGN, TOKEN_SUB);
-
-        case '*':
-            return single_or_double_char(s, '=', TOKEN_MUL_ASSIGN, TOKEN_MUL);
-
-        case '/':
-            return single_or_double_char(s, '=', TOKEN_DIV_ASSIGN, TOKEN_DIV);
+        case '-': return single_or_double_char_2(s, '>', TOKEN_FUNC_RETURN, '=', TOKEN_SUB_ASSIGN, TOKEN_SUB);
     }
 
     fprintf(stderr, "Unexpected character \'%c\' in source file.", curr_char(s));
