@@ -26,6 +26,7 @@ extern void token_initialise() {
     string_intern_initialise();
 
     // Intern all keywords
+    intern_string("case");
     intern_string("const");
     intern_string("defer");
     intern_string("else");
@@ -36,6 +37,7 @@ extern void token_initialise() {
     intern_string("import");
     intern_string("interface");
     intern_string("struct");
+    intern_string("switch");
     intern_string("var");
     intern_string("while");
 }
@@ -57,6 +59,7 @@ extern Token *create_token(TokenKind kind, long start, int len) {
 
 extern char *token_kind_string(TokenKind kind) {
     switch (kind) {
+        case TOKEN_CASE: return "CASE";
         case TOKEN_CONST: return "CONST";
         case TOKEN_DEFER: return "DEFER";
         case TOKEN_ELSE: return "ELSE";
@@ -67,6 +70,7 @@ extern char *token_kind_string(TokenKind kind) {
         case TOKEN_IMPORT: return "IMPORT";
         case TOKEN_INTERFACE: return "INTERFACE";
         case TOKEN_STRUCT: return "STRUCT";
+        case TOKEN_SWITCH: return "SWITCH";
         case TOKEN_VAR: return "VAR";
         case TOKEN_WHILE: return "WHILE";
 
@@ -82,6 +86,7 @@ extern char *token_kind_string(TokenKind kind) {
         case TOKEN_COLON: return "COLON";
         case TOKEN_COMMA: return "COMMA";
         case TOKEN_DOT: return "DOT";
+        case TOKEN_NOT: return "NOT";
         case TOKEN_FUNC_RETURN: return "FUNC_RETURN";
         
         // Assignment
@@ -100,6 +105,7 @@ extern char *token_kind_string(TokenKind kind) {
 
         // Boolean operators
         case TOKEN_EQ: return "EQUAL";
+        case TOKEN_NOT_EQ: return "NOT_EQUAL";
         case TOKEN_GE: return "GREATER_THAN_OR_EQUAL";
         case TOKEN_GT: return "GREATER_THAN";
         case TOKEN_LE: return "LESS_THAN_OR_EQUAL";
