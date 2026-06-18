@@ -25,7 +25,7 @@ static void display_usage() {
 void main(int argc, char **argv) {
     if (argc < 2) {
         display_usage();
-        exit(EINVALID_CMDLINE_ARGS);
+        exit(-20);
     }
 
     // Command line parameters

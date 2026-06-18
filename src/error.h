@@ -9,22 +9,21 @@
 // Fatal errors
 enum fatal_errors {
     EOUT_OF_MEMORY = 1,
-    EUNEXPECTED_CHARACTER = 2,
-    EINVALID_CMDLINE_ARGS = 3
+    EMAX_ERRORS_EXCEEDED
 };
 
 enum error_number {
     E_EXPECTED_TYPE
 };
 
-typedef struct error {
+typedef struct error_old {
     enum error_number error_number;
     char *msg;
     AstNode *node;
-} Error;
+} Error_old;
 
 typedef struct errors {
-    Error error;
+    Error_old error;
 } Errors;
 
 // Public functions

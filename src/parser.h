@@ -3,9 +3,10 @@
 #include "scanner.h"
 #include "source.h"
 
-typedef struct parser {
+typedef struct parser
+{
     SourceFile *source_file;
-    Scanner    *scanner;
+    Scanner *scanner;
 } Parser;
 
 // Public functions

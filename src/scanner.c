@@ -135,7 +135,7 @@ Token *next_token(Scanner *s) {
     }
 
     fprintf(stderr, "Unexpected character \'%c\' in source file.", curr_char(s));
-    exit(EUNEXPECTED_CHARACTER);
+    exit(-10);
 }
 
 Scanner *create_test_scanner(char *src) {

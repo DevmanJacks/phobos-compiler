@@ -11,7 +11,7 @@ static char *messages[] = {
 
 #define MAX_ERRORS 10
 
-static Error errors[MAX_ERRORS];
+static Error_old errors[MAX_ERRORS];
 
 static int next_error = 0;
 
